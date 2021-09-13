@@ -329,16 +329,26 @@ defchan gen_av1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool?! v; bool!? a)
 export defchan av1of <: gen_av1of<false,0> () { }
 export defchan avr1of <: gen_av1of<true,0> () { }
 
-export defchan e1of2 <: e1of<2> (bool t, f)
+export defchan e1of2 <: e1of<2> (bool?! t, f)
 {
   d.r[0] = f;
   d.r[1] = t;
 }
 
-export defchan a1of2 <: a1of<2> (bool t, f)
+export defchan a1of2 <: a1of<2> (bool?! t, f)
 {
   d.r[0] = f;
   d.r[1] = t;
+}
+
+export defchan a1of1 <: a1of<1> (bool?! r)
+{
+  r = d.r[0];
+}
+
+export defchan e1of1 <: e1of<1> (bool?! r)
+{
+  r = d.r[0];
 }
 
 /*------------------------------------------------------------------------
@@ -466,6 +476,11 @@ defchan gen_pv1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool?! v; bool!? r)
 export defchan pull_v1of <: gen_pv1of<false,0> () { }
 export defchan pull_vr1of <: gen_pv1of<true,0> () { }
 
+export defchan pull_1of2 <: pull_1of<2> (bool?! t, f)
+{
+  d.r[0] = f;
+  d.r[1] = t;
+}
 
 /*------------------------------------------------------------------------
  *
