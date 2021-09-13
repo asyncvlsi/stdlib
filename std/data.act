@@ -1,0 +1,88 @@
+/*************************************************************************
+ *
+ *  This file is part of ACT standard library
+ *
+ *  Copyright (c) 2020-2021 Rajit Manohar
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ **************************************************************************
+ */
+
+/*------------------------------------------------------------------------
+ *
+ *  Standard data types
+ *
+ *    - d1of<N>  : 1-of-N code
+ *    - d1of2    : 1-of-2 code with t/f rails
+ *    - dualrail : another name for d1of2
+ *
+ *------------------------------------------------------------------------
+ */
+
+namespace std {
+
+export namespace data {
+
+/*
+ *  A delay-insensitive 1-of-N code
+ *
+ *
+ *  Template parameters:
+ *
+ *         N : the "N" in the 1-of-N code
+ *
+ *  Signals:
+ *
+ *      r[N] : the code (rails) r[0], ..., r[N-1]
+ *
+ */
+export template<pint N>
+deftype d1of <: enum<N> (bool?! r[N])
+{
+   spec {
+    exclhi(r)
+   }
+
+  /* set/get methods */
+  methods {
+    set {
+     (,i:N: r[i]-);r[self]+
+    }
+    get {
+     [([]i:N: r[i] -> self:=i)]
+    }
+  }
+}
+
+
+/*
+ * Common one-of-two data type has "t" and "f" rails that are used to signal
+ * true versus false. No extra wires, just convenient names for the existing
+ * data wires.
+ */
+export deftype d1of2 <: d1of<2> (bool?! t, f)
+{
+  r[0] = t;
+  r[1] = f;
+}
+
+
+/*
+ *   dualrail: standard dual rail data
+ *
+ */
+export deftype dualrail <: d1of2() { }
+
+}
+}
