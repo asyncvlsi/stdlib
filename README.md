@@ -6,3 +6,6 @@ that will be installed in `$ACT_HOME/act`. This path is part of the default sear
 
 The comments in the `.act` files have some basic documentation.
 
+## Installation
+
+Set `$ACT_HOME` to the root of your ACT installation, and then run `make install`
