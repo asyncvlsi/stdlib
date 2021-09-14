@@ -40,6 +40,9 @@ export namespace cells {
 export defcell TIELOX1 (bool! Y)
 {
   bool x;
+  spec {
+    rand_init (x)
+  }
   prs {
     [keeper=0] x -> Y-
     [keeper=0] ~x -> x+
@@ -49,6 +52,9 @@ export defcell TIELOX1 (bool! Y)
 export defcell TIEHIX1 (bool! Y)
 {
   bool x;
+  spec {
+    rand_init (x)
+  }
   prs {
     [keeper=0] ~x -> Y+
     [keeper=0] x -> x-
