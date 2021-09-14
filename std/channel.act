@@ -33,17 +33,21 @@ import std::data;
  *
  *   (e|a)[v][r]1of<N>  - channel with 1ofN encoding
  *
- *   (e|a)[v][r]1of2<N> - data channel, N-bit dual rail code
- *      
- *   (e|a)[v][r]1of4<N> - data channel, 2N-bit one of four code
- *
  *  These standard channels are "push"-type channels, with an active
  *  sender and passive receiver.
  *
  *
  *  Pull channels:
- *     pull_[v][r]1of<N>  - pull channel (data, "r" for request)
+ *     pull_[v][r]1of<N>  - pull channel with 1ofN encoding 
+ *                          (data, "r" for request)
  *
+ *  Short-cuts:
+ *     e1of1 - has a ".r" field for request
+ *
+ *     e1of2, ev1of2, er1of2, evr1of2 - has ".t" and ".f" rails
+ *
+ *     a1of1
+ *     a1of2, av1of2, ar1of2, avr1of2
  *
  *  Reset protocol:
  *      e channels : reset with e low and data low [special case to
@@ -70,9 +74,9 @@ import std::data;
  *
  *    Fields:  .r = request, .a = ack, .d[] = data bundle
  *
- *   [r]bd<M> : bundled-data push-type N-bit channel, .r driven by sender
+ *   [r]bd<M> : bundled-data push-type M-bit channel, .r driven by sender
  *    
- *  pull_[r]bd<M> : bundled-data pull-type N-bit channel, .r driven by receiver
+ *  pull_[r]bd<M> : bundled-data pull-type M-bit channel, .r driven by receiver
  *
  *
  *------------------------------------------------------------------------
@@ -214,6 +218,41 @@ defchan gen_ev1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool?! v; bool!? e)
 }
 export defchan ev1of <: gen_ev1of<false,0> () { }
 export defchan evr1of <: gen_ev1of<true,0> () { }
+
+/* -- short cuts -- */
+export defchan e1of1 <: e1of<1> (bool?! r)
+{
+  r = d.r[0];
+}
+
+export defchan e1of2 <: e1of<2> (bool?! t, f)
+{
+  d.r[0] = f;
+  d.r[1] = t;
+}
+
+export defchan er1of2 <: e1of<2> (bool?! t, f)
+{
+  d.r[0] = f;
+  d.r[1] = t;
+}
+
+export defchan ev1of2 <: ev1of<2> (bool?! t, f)
+{
+  d.r[0] = f;
+  d.r[1] = t;
+}
+
+export defchan evr1of2 <: evr1of<2> (bool?! t, f)
+{
+  d.r[0] = f;
+  d.r[1] = t;
+}
+
+/*------------------------------------------------------------------------
+ *   Ack channels
+ *------------------------------------------------------------------------
+ */
   
 template<pbool reset; pint V; pint N>
 defchan gen_a1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool!? a)
@@ -329,10 +368,9 @@ defchan gen_av1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool?! v; bool!? a)
 export defchan av1of <: gen_av1of<false,0> () { }
 export defchan avr1of <: gen_av1of<true,0> () { }
 
-export defchan e1of2 <: e1of<2> (bool?! t, f)
+export defchan a1of1 <: a1of<1> (bool?! r)
 {
-  d.r[0] = f;
-  d.r[1] = t;
+  r = d.r[0];
 }
 
 export defchan a1of2 <: a1of<2> (bool?! t, f)
@@ -341,15 +379,24 @@ export defchan a1of2 <: a1of<2> (bool?! t, f)
   d.r[1] = t;
 }
 
-export defchan a1of1 <: a1of<1> (bool?! r)
+export defchan ar1of2 <: a1of<2> (bool?! t, f)
 {
-  r = d.r[0];
+  d.r[0] = f;
+  d.r[1] = t;
 }
 
-export defchan e1of1 <: e1of<1> (bool?! r)
+export defchan av1of2 <: av1of<2> (bool?! t, f)
 {
-  r = d.r[0];
+  d.r[0] = f;
+  d.r[1] = t;
 }
+
+export defchan avr1of2 <: avr1of<2> (bool?! t, f)
+{
+  d.r[0] = f;
+  d.r[1] = t;
+}
+
 
 /*------------------------------------------------------------------------
  *
