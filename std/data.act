@@ -84,5 +84,25 @@ export deftype d1of2 <: d1of<2> (bool?! t, f)
  */
 export deftype dualrail <: d1of2() { }
 
+
+/*
+ *  Multi-bit dualrail
+ */
+export
+template<pint M>
+deftype Mx1of2 <: int<M> (dualrail d[M])
+{
+  /* set/get methods */
+  methods {
+    set {
+      (,i:M:[self{i} = 0 -> d[i].t-;d[i].f+ [] else -> d[i].f-;d[i].t+])
+    }
+    get {
+      self:=0;
+      (;i:M: self := (self << 1) | d[M-i-1])
+    }
+  }
+}
+
 }
 }

@@ -536,21 +536,21 @@ export defchan pull_1of2 <: pull_1of<2> (bool?! t, f)
  *------------------------------------------------------------------------
  */
 template<pbool reset; pint V; pint M>
-defchan gen_Mx1of2 <: chan(int<M>) (std::data::dualrail?! d[M]; bool!? e)
+defchan gen_Mx1of2 <: chan(int<M>) (std::data::Mx1of2?!<M> d; bool!? e)
 {
   { 0 <= V & std::ceil_log2(V) < M : "Initial token value out of range" };
   
   methods {
     /*-- initialize channel, sender end --*/
     send_init {
-      [ reset -> (,i:M: [ ((V >> i) & 1) = 0 -> d[i].f+ [] else -> d[i].t+ ])
-      [] else -> (,i:M: d[i].t-,d[i].f-)
+      [ reset -> (,i:M: [ ((V >> i) & 1) = 0 -> d.d[i].f+ [] else -> d.d[i].t+ ])
+      [] else -> (,i:M: d.d[i].t-,d.d[i].f-)
       ]
     }
 
     /*-- set output data --*/
     set {
-      (,i:M: [((self >> i) & 1) = 0 -> d[i].f+ [] else -> d[i].t+ ])
+      (,i:M: [((self >> i) & 1) = 0 -> d.d[i].f+ [] else -> d.d[i].t+ ])
     }
 
     /*-- finish synchronization --*/
@@ -560,7 +560,7 @@ defchan gen_Mx1of2 <: chan(int<M>) (std::data::dualrail?! d[M]; bool!? e)
 
     /*-- reset part of the protocol --*/
     send_rest {
-      (,i:M: d[i].t-,d[i].f-);[e]
+      (,i:M: d.d[i].t-,d.d[i].f-);[e]
     }
 
     /*-- initialize channel, receiver end --*/
@@ -572,9 +572,9 @@ defchan gen_Mx1of2 <: chan(int<M>) (std::data::dualrail?! d[M]; bool!? e)
 
     /*-- get value --*/
     get {
-      [(&i:M: d[i].t | d[i].f)];
+      [(&i:M: d.d[i].t | d.d[i].f)];
       self := 0;
-      (;i:M: [ d[i].t -> self := self | (1 << i)
+      (;i:M: [ d.d[i].t -> self := self | (1 << i)
 	     [] else -> skip
 	     ]
       )
@@ -587,11 +587,11 @@ defchan gen_Mx1of2 <: chan(int<M>) (std::data::dualrail?! d[M]; bool!? e)
 
     /*-- reset part of the protocol --*/
     recv_rest {
-      [(&i:M:~d[i].t & ~d[i].f)];e+
+      [(&i:M:~d.d[i].t & ~d.d[i].f)];e+
     }
 
     /*-- probe expression on receiver --*/
-    recv_probe = (d[0].t|d[0].f);
+    recv_probe = (d.d[0].t|d.d[0].f);
 
     // no sender probe
   }
@@ -601,21 +601,21 @@ export defchan erMx1of2 <: gen_Mx1of2<true,0> () { }
 
 
 template<pbool reset; pint V; pint M>
-defchan gen_aMx1of2 <: chan(int<M>) (std::data::dualrail?! d[M]; bool!? a)
+defchan gen_aMx1of2 <: chan(int<M>) (std::data::Mx1of2?!<M> d; bool!? a)
 {
   { 0 <= V & std::ceil_log2(V) < M : "Initial token value out of range" };
   
   methods {
     /*-- initialize channel, sender end --*/
     send_init {
-      [ reset -> (,i:M: [ ((V >> i) & 1) = 0 -> d[i].f+ [] else -> d[i].t+ ])
-      [] else -> (,i:M: d[i].t-,d[i].f-)
+      [ reset -> (,i:M: [ ((V >> i) & 1) = 0 -> d.d[i].f+ [] else -> d.d[i].t+ ])
+      [] else -> (,i:M: d.d[i].t-,d.d[i].f-)
       ]
     }
 
     /*-- set output data --*/
     set {
-      (,i:M: [((self >> i) & 1) = 0 -> d[i].f+ [] else -> d[i].t+ ])
+      (,i:M: [((self >> i) & 1) = 0 -> d.d[i].f+ [] else -> d.d[i].t+ ])
     }
 
     /*-- finish synchronization --*/
@@ -625,7 +625,7 @@ defchan gen_aMx1of2 <: chan(int<M>) (std::data::dualrail?! d[M]; bool!? a)
 
     /*-- reset part of the protocol --*/
     send_rest {
-      (,i:M: d[i].t-,d[i].f-);[~a]
+      (,i:M: d.d[i].t-,d.d[i].f-);[~a]
     }
 
     /*-- initialize channel, receiver end --*/
@@ -635,9 +635,9 @@ defchan gen_aMx1of2 <: chan(int<M>) (std::data::dualrail?! d[M]; bool!? a)
 
     /*-- get value --*/
     get {
-      [(&i:M: d[i].t | d[i].f)];
+      [(&i:M: d.d[i].t | d.d[i].f)];
       self := 0;
-      (;i:M: [ d[i].t -> self := self | (1 << i)
+      (;i:M: [ d.d[i].t -> self := self | (1 << i)
 	     [] else -> skip
 	     ]
       )
@@ -650,11 +650,11 @@ defchan gen_aMx1of2 <: chan(int<M>) (std::data::dualrail?! d[M]; bool!? a)
 
     /*-- reset part of the protocol --*/
     recv_rest {
-      [(&i:M:~d[i].t & ~d[i].f)];a-
+      [(&i:M:~d.d[i].t & ~d.d[i].f)];a-
     }
 
     /*-- probe expression on receiver --*/
-    recv_probe = (d[0].t|d[0].f);
+    recv_probe = (d.d[0].t|d.d[0].f);
 
     // no sender probe
   }
@@ -664,21 +664,21 @@ export defchan arMx1of2 <: gen_aMx1of2<true,0> () { }
 
 
 template<pbool reset; pint V; pint M>
-defchan gen_pMx1of2 <: chan(int<M>) (std::data::dualrail?! d[M]; bool!? r)
+defchan gen_pMx1of2 <: chan(int<M>) (std::data::Mx1of2?!<M> d; bool!? r)
 {
   { 0 <= V & std::ceil_log2(V) < M : "Initial token value out of range" };
   
   methods {
     /*-- initialize channel, sender end --*/
     send_init {
-      [ reset -> (,i:M: [ ((V >> i) & 1) = 0 -> d[i].f+ [] else -> d[i].t+ ])
-      [] else -> (,i:M: d[i].t-,d[i].f-)
+      [ reset -> (,i:M: [ ((V >> i) & 1) = 0 -> d.d[i].f+ [] else -> d.d[i].t+ ])
+      [] else -> (,i:M: d.d[i].t-,d.d[i].f-)
       ]
     }
 
     /*-- set output data --*/
     set {
-      [r];(,i:M: [((self >> i) & 1) = 0 -> d[i].f+ [] else -> d[i].t+ ])
+      [r];(,i:M: [((self >> i) & 1) = 0 -> d.d[i].f+ [] else -> d.d[i].t+ ])
     }
 
     /*-- finish synchronization --*/
@@ -688,7 +688,7 @@ defchan gen_pMx1of2 <: chan(int<M>) (std::data::dualrail?! d[M]; bool!? r)
 
     /*-- reset part of the protocol --*/
     send_rest {
-      [~r];(,i:M: d[i].t-,d[i].f-)
+      [~r];(,i:M: d.d[i].t-,d.d[i].f-)
     }
 
     /*-- initialize channel, receiver end --*/
@@ -701,9 +701,9 @@ defchan gen_pMx1of2 <: chan(int<M>) (std::data::dualrail?! d[M]; bool!? r)
     /*-- get value --*/
     get {
       r+;
-      [(&i:M: d[i].t | d[i].f)];
+      [(&i:M: d.d[i].t | d.d[i].f)];
       self := 0;
-      (;i:M: [ d[i].t -> self := self | (1 << i)
+      (;i:M: [ d.d[i].t -> self := self | (1 << i)
 	     [] else -> skip
 	     ]
       )
@@ -716,7 +716,7 @@ defchan gen_pMx1of2 <: chan(int<M>) (std::data::dualrail?! d[M]; bool!? r)
 
     /*-- reset part of the protocol --*/
     recv_rest {
-      r-;[(&i:M:~d[i].t & ~d[i].f)]
+      r-;[(&i:M:~d.d[i].t & ~d.d[i].f)]
     }
 
     /*-- probe expression on sender --*/
