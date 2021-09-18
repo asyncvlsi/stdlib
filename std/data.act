@@ -44,23 +44,23 @@ export namespace data {
  *
  *  Signals:
  *
- *      r[N] : the code (rails) r[0], ..., r[N-1]
+ *      d[N] : the code (data rails) d[0], ..., d[N-1]
  *
  */
 export template<pint N>
-deftype d1of <: enum<N> (bool?! r[N])
+deftype d1of <: enum<N> (bool?! d[N])
 {
    spec {
-    exclhi(r)
+    exclhi(d)
    }
 
   /* set/get methods */
   methods {
     set {
-     (,i:N: r[i]-);r[self]+
+     (,i:N: d[i]-);d[self]+
     }
     get {
-     [([]i:N: r[i] -> self:=i)]
+     [([]i:N: d[i] -> self:=i)]
     }
   }
 }
@@ -73,8 +73,8 @@ deftype d1of <: enum<N> (bool?! r[N])
  */
 export deftype d1of2 <: d1of<2> (bool?! t, f)
 {
-  r[0] = t;
-  r[1] = f;
+  d[0] = f;
+  d[1] = t;
 }
 
 

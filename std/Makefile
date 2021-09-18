@@ -15,9 +15,9 @@
 #  limitations under the License.
 #  
 #-------------------------------------------------------------------------
-TARGETACT=globals.act spreset.act
+TARGETACT=_all_.act channel.act data.act func.act
 
-SUBDIRS=std
+TARGETACTSUBDIR=std
 
 include $(ACT_HOME)/scripts/Makefile.std
 

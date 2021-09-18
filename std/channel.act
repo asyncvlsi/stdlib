@@ -84,7 +84,7 @@ import std::data;
 
 namespace std {
 
-namespace channel {
+export namespace channel {
 
 /*------------------------------------------------------------------------
  *
@@ -108,14 +108,14 @@ defchan gen_e1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool!? e)
   methods {
     /*-- initialize channel, sender end --*/
     send_init {
-      [ reset -> (,i:N: [ i != V -> d.r[i]- [] else -> d.r[i]+ ])
-      [] else -> (,i:N: d.r[i]-)
+      [ reset -> (,i:N: [ i != V -> d.d[i]- [] else -> d.d[i]+ ])
+      [] else -> (,i:N: d.d[i]-)
       ]   
     }
 
     /*-- set output data --*/
     set {
-      [([]i:N: self = i -> d.r[i]+)]
+      [([]i:N: self = i -> d.d[i]+)]
     }
 
     /*-- finish synchronization --*/
@@ -125,7 +125,7 @@ defchan gen_e1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool!? e)
 
     /*-- reset part of the protocol --*/
     send_rest {
-      (,i:N:d.r[i]-);[e]
+      (,i:N:d.d[i]-);[e]
     }
 
     /*-- initialize channel, receiver end --*/
@@ -137,7 +137,7 @@ defchan gen_e1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool!? e)
 
     /*-- get value --*/
     get {
-      [([]i:N:d.r[i] -> self := i)]
+      [([]i:N:d.d[i] -> self := i)]
     }
 
     /*-- finish synchronization action --*/
@@ -147,11 +147,11 @@ defchan gen_e1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool!? e)
 
     /*-- reset part of the protocol --*/
     recv_rest {
-      [(&i:N:~d.r[i])];e+
+      [(&i:N:~d.d[i])];e+
     }
 
     /*-- probe expression on receiver --*/
-    recv_probe = (|i:N:d.r[i]);
+    recv_probe = (|i:N:d.d[i]);
 
     // no sender probe
   }
@@ -168,14 +168,14 @@ defchan gen_ev1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool?! v; bool!? e)
   methods {
     /*-- initialize channel, sender end --*/
     send_init {
-      [ reset -> (,i:N: [ i != V -> d.r[i]- [] else -> d.r[i]+ ]),v+
-	[] else -> (,i:N: d.r[i]-),v-
+      [ reset -> (,i:N: [ i != V -> d.d[i]- [] else -> d.d[i]+ ]),v+
+	[] else -> (,i:N: d.d[i]-),v-
       ]   
     }
 
     /*-- set output data --*/
     set {
-      [([]i:N: self = i -> d.r[i]+)];v+
+      [([]i:N: self = i -> d.d[i]+)];v+
     }
 
     /*-- finish synchronization --*/
@@ -185,7 +185,7 @@ defchan gen_ev1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool?! v; bool!? e)
 
     /*-- reset part of the protocol --*/
     send_rest {
-      (,i:N:d.r[i]-);v-;[e]
+      (,i:N:d.d[i]-);v-;[e]
     }
 
     /*-- initialize channel, receiver end --*/
@@ -197,7 +197,7 @@ defchan gen_ev1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool?! v; bool!? e)
 
     /*-- get value --*/
     get {
-      [([]i:N:v & d.r[i] -> self := i)]
+      [([]i:N:v & d.d[i] -> self := i)]
     }
 
     /*-- finish synchronization action --*/
@@ -207,7 +207,7 @@ defchan gen_ev1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool?! v; bool!? e)
 
     /*-- reset part of the protocol --*/
     recv_rest {
-      [~v & (&i:N:~d.r[i])];e+
+      [~v & (&i:N:~d.d[i])];e+
     }
 
     /*-- probe expression on receiver --*/
@@ -222,31 +222,31 @@ export defchan evr1of <: gen_ev1of<true,0> () { }
 /* -- short cuts -- */
 export defchan e1of1 <: e1of<1> (bool?! r)
 {
-  r = d.r[0];
+  r = d.d[0];
 }
 
 export defchan e1of2 <: e1of<2> (bool?! t, f)
 {
-  d.r[0] = f;
-  d.r[1] = t;
+  d.d[0] = f;
+  d.d[1] = t;
 }
 
 export defchan er1of2 <: e1of<2> (bool?! t, f)
 {
-  d.r[0] = f;
-  d.r[1] = t;
+  d.d[0] = f;
+  d.d[1] = t;
 }
 
 export defchan ev1of2 <: ev1of<2> (bool?! t, f)
 {
-  d.r[0] = f;
-  d.r[1] = t;
+  d.d[0] = f;
+  d.d[1] = t;
 }
 
 export defchan evr1of2 <: evr1of<2> (bool?! t, f)
 {
-  d.r[0] = f;
-  d.r[1] = t;
+  d.d[0] = f;
+  d.d[1] = t;
 }
 
 /*------------------------------------------------------------------------
@@ -262,14 +262,14 @@ defchan gen_a1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool!? a)
   methods {
     /*-- initialize channel, sender end --*/
     send_init {
-      [ reset -> (,i:N: [ i != V -> d.r[i]- [] else -> d.r[i]+ ])
-      [] else -> (,i:N: d.r[i]-)
+      [ reset -> (,i:N: [ i != V -> d.d[i]- [] else -> d.d[i]+ ])
+      [] else -> (,i:N: d.d[i]-)
       ]   
     }
 
     /*-- set output data --*/
     set {
-      [([]i:N: self = i -> d.r[i]+)]
+      [([]i:N: self = i -> d.d[i]+)]
     }
 
     /*-- finish synchronization --*/
@@ -279,7 +279,7 @@ defchan gen_a1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool!? a)
 
     /*-- reset part of the protocol --*/
     send_rest {
-      (,i:N:d.r[i]-);[~a]
+      (,i:N:d.d[i]-);[~a]
     }
 
     /*-- initialize channel, receiver end --*/
@@ -289,7 +289,7 @@ defchan gen_a1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool!? a)
 
     /*-- get value --*/
     get {
-      [([]i:N:d.r[i] -> self := i)]
+      [([]i:N:d.d[i] -> self := i)]
     }
 
     /*-- finish synchronization action --*/
@@ -299,11 +299,11 @@ defchan gen_a1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool!? a)
 
     /*-- reset part of the protocol --*/
     recv_rest {
-      [(&i:N:~d.r[i])];a-
+      [(&i:N:~d.d[i])];a-
     }
 
     /*-- probe expression on receiver --*/
-    recv_probe = (|i:N:d.r[i]);
+    recv_probe = (|i:N:d.d[i]);
 
     // no sender probe
   }
@@ -319,14 +319,14 @@ defchan gen_av1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool?! v; bool!? a)
   methods {
     /*-- initialize channel, sender end --*/
     send_init {
-      [ reset -> (,i:N: [ i != V -> d.r[i]- [] else -> d.r[i]+ ]),v+
-	[] else -> (,i:N: d.r[i]-),v-
+      [ reset -> (,i:N: [ i != V -> d.d[i]- [] else -> d.d[i]+ ]),v+
+	[] else -> (,i:N: d.d[i]-),v-
       ]   
     }
 
     /*-- set output data --*/
     set {
-      [([]i:N: self = i -> d.r[i]+)];v+
+      [([]i:N: self = i -> d.d[i]+)];v+
     }
 
     /*-- finish synchronization --*/
@@ -336,7 +336,7 @@ defchan gen_av1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool?! v; bool!? a)
 
     /*-- reset part of the protocol --*/
     send_rest {
-      (,i:N:d.r[i]-);v-;[~a]
+      (,i:N:d.d[i]-);v-;[~a]
     }
 
     /*-- initialize channel, receiver end --*/
@@ -346,7 +346,7 @@ defchan gen_av1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool?! v; bool!? a)
 
     /*-- get value --*/
     get {
-      [([]i:N:v & d.r[i] -> self := i)]
+      [([]i:N:v & d.d[i] -> self := i)]
     }
 
     /*-- finish synchronization action --*/
@@ -356,7 +356,7 @@ defchan gen_av1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool?! v; bool!? a)
 
     /*-- reset part of the protocol --*/
     recv_rest {
-      [~v & (&i:N:~d.r[i])];a-
+      [~v & (&i:N:~d.d[i])];a-
     }
 
     /*-- probe expression on receiver --*/
@@ -370,31 +370,31 @@ export defchan avr1of <: gen_av1of<true,0> () { }
 
 export defchan a1of1 <: a1of<1> (bool?! r)
 {
-  r = d.r[0];
+  r = d.d[0];
 }
 
 export defchan a1of2 <: a1of<2> (bool?! t, f)
 {
-  d.r[0] = f;
-  d.r[1] = t;
+  d.d[0] = f;
+  d.d[1] = t;
 }
 
 export defchan ar1of2 <: a1of<2> (bool?! t, f)
 {
-  d.r[0] = f;
-  d.r[1] = t;
+  d.d[0] = f;
+  d.d[1] = t;
 }
 
 export defchan av1of2 <: av1of<2> (bool?! t, f)
 {
-  d.r[0] = f;
-  d.r[1] = t;
+  d.d[0] = f;
+  d.d[1] = t;
 }
 
 export defchan avr1of2 <: avr1of<2> (bool?! t, f)
 {
-  d.r[0] = f;
-  d.r[1] = t;
+  d.d[0] = f;
+  d.d[1] = t;
 }
 
 
@@ -413,14 +413,14 @@ defchan gen_p1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool!? r)
   methods {
     /*-- initialize channel, sender end --*/
     send_init {
-      [ reset -> (,i:N: [ i != V -> d.r[i]- [] else -> d.r[i]+ ])
-      [] else -> (,i:N: d.r[i]-)
+      [ reset -> (,i:N: [ i != V -> d.d[i]- [] else -> d.d[i]+ ])
+      [] else -> (,i:N: d.d[i]-)
       ]   
     }
 
     /*-- set output data --*/
     set {
-      [r];[([]i:N: self = i -> d.r[i]+)]
+      [r];[([]i:N: self = i -> d.d[i]+)]
     }
 
     /*-- finish synchronization --*/
@@ -430,7 +430,7 @@ defchan gen_p1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool!? r)
 
     /*-- reset part of the protocol --*/
     send_rest {
-      [~r];(,i:N:d.r[i]-)
+      [~r];(,i:N:d.d[i]-)
     }
 
     /*-- initialize channel, receiver end --*/
@@ -442,7 +442,7 @@ defchan gen_p1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool!? r)
 
     /*-- get value --*/
     get {
-      r+;[([]i:N:d.r[i] -> self := i)]
+      r+;[([]i:N:d.d[i] -> self := i)]
     }
 
     /*-- finish synchronization action --*/
@@ -452,7 +452,7 @@ defchan gen_p1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool!? r)
 
     /*-- reset part of the protocol --*/
     recv_rest {
-      r-;[(&i:N:~d.r[i])]
+      r-;[(&i:N:~d.d[i])]
     }
 
     /*-- probe expression on sender --*/
@@ -472,14 +472,14 @@ defchan gen_pv1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool?! v; bool!? r)
   methods {
     /*-- initialize channel, sender end --*/
     send_init {
-      [ reset -> (,i:N: [ i != V -> d.r[i]- [] else -> d.r[i]+ ]),v+
-      [] else -> (,i:N: d.r[i]-),v-
+      [ reset -> (,i:N: [ i != V -> d.d[i]- [] else -> d.d[i]+ ]),v+
+      [] else -> (,i:N: d.d[i]-),v-
       ]   
     }
 
     /*-- set output data --*/
     set {
-      [r];[([]i:N: self = i -> d.r[i]+)];v+
+      [r];[([]i:N: self = i -> d.d[i]+)];v+
     }
 
     /*-- finish synchronization --*/
@@ -489,7 +489,7 @@ defchan gen_pv1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool?! v; bool!? r)
 
     /*-- reset part of the protocol --*/
     send_rest {
-      [~r];(,i:N:d.r[i]-);v-
+      [~r];(,i:N:d.d[i]-);v-
     }
 
     /*-- initialize channel, receiver end --*/
@@ -501,7 +501,7 @@ defchan gen_pv1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool?! v; bool!? r)
 
     /*-- get value --*/
     get {
-      r+;[([]i:N:v & d.r[i] -> self := i)]
+      r+;[([]i:N:v & d.d[i] -> self := i)]
     }
 
     /*-- finish synchronization action --*/
@@ -511,7 +511,7 @@ defchan gen_pv1of <: chan(enum<N>) (std::data::d1of?!<N> d; bool?! v; bool!? r)
 
     /*-- reset part of the protocol --*/
     recv_rest {
-      r-;[~v & (&i:N:~d.r[i])]
+      r-;[~v & (&i:N:~d.d[i])]
     }
 
     /*-- probe expression on sender --*/
@@ -525,8 +525,8 @@ export defchan pull_vr1of <: gen_pv1of<true,0> () { }
 
 export defchan pull_1of2 <: pull_1of<2> (bool?! t, f)
 {
-  d.r[0] = f;
-  d.r[1] = t;
+  d.d[0] = f;
+  d.d[1] = t;
 }
 
 /*------------------------------------------------------------------------
