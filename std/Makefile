@@ -15,7 +15,7 @@
 #  limitations under the License.
 #  
 #-------------------------------------------------------------------------
-TARGETACT=_all_.act channel.act data.act func.act
+TARGETACT=_all_.act channel.act data.act func.act cells.act
 
 TARGETACTSUBDIR=std
 
