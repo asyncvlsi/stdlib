@@ -736,7 +736,7 @@ export defchan pull_rMx1of2 <: gen_pMx1of2<true,0> () { }
  *------------------------------------------------------------------------
  */
 template<pbool reset; pint V; pint M>
-defchan gen_Mbd <: chan(int<M>) (bool?! d[M]; bool!? r; bool?! a)
+defchan gen_Mbd <: chan(int<M>) (bool?! d[M]; bool?! r; bool!? a)
 {
   { 0 <= V & std::ceil_log2(V) < M : "Initial token value out of range" };
 
@@ -750,7 +750,7 @@ defchan gen_Mbd <: chan(int<M>) (bool?! d[M]; bool!? r; bool?! a)
     send_init {
       [ reset -> (,i:M: [ ((V >> i) & 1) = 0 -> d[i]- [] else -> d[i]+ ])
      [] else -> (,i:M: d[i]-)
-      ]
+      ];r-
     }
 
     /*-- set output data --*/
@@ -801,7 +801,7 @@ export defchan rbd <: gen_Mbd<true,0> () { }
 
 
 template<pbool reset; pint V; pint M>
-defchan gen_pMbd <: chan(int<M>) (bool?! d[M]; bool?! r; bool!? a)
+defchan gen_pMbd <: chan(int<M>) (bool?! d[M]; bool!? r; bool?! a)
 {
   { 0 <= V & std::ceil_log2(V) < M : "Initial token value out of range" };
 
