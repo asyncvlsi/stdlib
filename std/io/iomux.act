@@ -1,0 +1,84 @@
+/*************************************************************************
+ *
+ *  This file is part of ACT standard library
+ *
+ *  Copyright (c) 2021 Rajit Manohar
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ **************************************************************************
+ */
+import std::channel;
+import "std/func.act";
+
+/*------------------------------------------------------------------------
+ *
+ *  Standard MUX/DEMUX modules
+ *
+ *  Funnel: a non-detemrinistic MUX (often called a funnel) that takes
+ *  N W-bit input channels and generates a single output channel that
+ *  has bitwidth W + log(N). The least significant log(N) bits of the
+ *  output encode the input channel ID whose data is being sent on the
+ *  output.
+ *
+ *  Horn: a de-mux that takes serialized data from a funnel, and
+ *  produces the corresponding data on the appropriate output
+ *  channel. The least significant bits in the data are taken to be
+ *  the channel index for the output.
+ *
+ *------------------------------------------------------------------------
+ */
+namespace std {
+
+export  namespace io {
+
+/*
+  N = # of channels to be merged
+  W = bit-width of the channels to be merged
+*/
+export template<pint N, W>
+defproc funnel(chan?(int<W>) in[N]; chan!(int<W + std::ceil_log2(N)>) out)
+{
+  pint M = std::ceil_log2(N);
+
+  int<W> x;
+  int<M> y;
+
+  pint X[N];
+  (i:N: X[i] = std::ceil_log2(i);)
+  
+  chp {
+    *[[| ([]i:N: #in[i] -> in[i]?x;y:=X[i];out!{x,y}) |]]
+  }
+}
+
+/*
+  N = # of output channels
+  W = bit-width of the output channels
+*/
+export template<pint N, W>
+defproc horn(chan?(int<W + std::ceil_log2(N)>) in; chan!(int<W>) out[N])
+{
+  pint M = std::ceil_log2(N);
+  int<W + M> x;
+  chp {
+   *[ in?x;
+      [ ([]i:N: x{M-1..0} = i -> out[i]!x{W+M-1..M}) ]
+    ]
+  }
+}
+
+} /* std::io */
+
+
+} /* std */
