@@ -1,0 +1,245 @@
+/*************************************************************************
+ *
+ *  Copyright (c) 2021 Rajit Manohar
+ *
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version 2
+ *  of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ *  Boston, MA  02110-1301, USA.
+ *
+ **************************************************************************
+ */
+namespace std {
+
+export namespace gates {
+
+/*
+ * Build an OR-gate tree (NOR/NAND/optional INV)
+ */
+export template<pint N>
+defproc ortree (bool? in[N]; bool out)
+{
+  bool tout;
+
+  { N > 0 : "What?" };
+
+  pint i, end, j;
+  pbool isinv;
+  isinv = false;
+  i = 0;
+  end = N-1;
+
+  /* dynamic array that holds all the nodes in the completion tree */
+  bool tmp[N];
+  (k:N:tmp[k] = in[k];)
+
+  /* Invariant: i <= end */
+    
+  *[ i != end ->
+     /* 
+      * Invariant: tmp[i..end] has the current signals that need to be
+      * combined together, and "isinv" specifies if they are the inverted
+      * sense or not
+      */
+     j = 0;
+     *[ i < end ->
+        /*-- there are still signals that need to be combined --*/
+        j = j + 1;
+        bool tmp[end+j..end+j];
+        [ i+2 >= end ->
+          /*-- last piece: use either a 2 or 3 input NAND/NOR gate --*/
+          [isinv ->
+            prs { (&k:i..end:tmp[k]) => tmp[end+j]- }
+          [] else ->
+            prs { (|k:i..end:tmp[k]) => tmp[end+j]- }
+          ]
+          i = end;
+        [] else ->
+          /*-- more to come; so use a two input C-element --*/
+          [isinv ->
+            prs { (&k:i..i+1:tmp[k]) => tmp[end+j]- }
+          [] else ->
+            prs { (|k:i..i+1:tmp[k]) => tmp[end+j]- }
+          ]
+          i = i + 2;
+        ]
+        sizing {
+          leak_adjust <- 1; 
+          p_n_mode <- 1;
+          tmp[end+j]{-1}
+        }
+      ]
+      /*-- we just added an inverting layer --*/
+      isinv = ~isinv;
+
+      /*-- update range that has to be combined --*/
+      i = end+1;
+      end = end+j;
+      j = 0;
+  ]
+
+  /*-- invert the signal if needed --*/
+  [isinv -> prs { tmp[end] => out- } 
+  [] else -> tmp[end] = out;
+  ]
+  [isinv ->
+  sizing {
+    leak_adjust <- 1; 
+    p_n_mode <- 1;
+    out{-1}
+  }
+  ]
+}
+  
+/*
+ * Build a completion tree using a combination of 2-input and 3-input
+ * C-elements 
+ */
+export template<pint N; pbool invert>
+defproc ctree (bool? in[N]; bool out)
+{
+  bool tout;
+
+  { N > 0 : "What?" };
+
+  pint i, end, j;
+  pbool isinv;
+  isinv = invert;
+  i = 0;
+  end = N-1;
+
+  /* dynamic array that holds all the nodes in the completion tree */
+  bool tmp[N];
+  (k:N:tmp[k] = in[k];)
+
+  /* Invariant: i <= end */
+    
+  *[ i != end ->
+     /* 
+      * Invariant: tmp[i..end] has the current signals that need to be
+      * combined together, and "isinv" specifies if they are the inverted
+      * sense or not
+      */
+     j = 0;
+     *[ i < end ->
+        /*-- there are still signals that need to be combined --*/
+        j = j + 1;
+        bool tmp[end+j..end+j];
+        [ i+2 >= end ->
+          /*-- last piece: use either a 2 or 3 input C-element --*/
+          prs { (&k:i..end:tmp[k]) #> tmp[end+j]- }
+          i = end;
+        [] else ->
+          /*-- more to come; so use a two input C-element --*/
+          prs { (&k:i..i+1:tmp[k]) #> tmp[end+j]- }
+          i = i + 2;
+        ]
+        sizing {
+          leak_adjust <- 1; 
+          p_n_mode <- 1;
+          tmp[end+j]{-1}
+        }
+      ]
+      /*-- we just added an inverting layer --*/
+      isinv = ~isinv;
+
+      /*-- update range that has to be combined --*/
+      i = end+1;
+      end = end+j;
+      j = 0;
+  ]
+  /*-- invert the signal if needed --*/
+  [isinv -> prs { tmp[end] => out- }
+  [] else -> tmp[end] = out;
+  ]
+  [isinv -> 
+  sizing {
+    p_n_mode <- 1;
+    leak_adjust <- 1; 
+    out{-1}
+  }
+  ]
+}
+
+export template<pint M>
+defproc sigbuf (bool in, out)
+{
+{ M >= 0 : "sigbuf: parameter error" };
+
+ pint N = M/3;
+  
+ // { N < 56 : "sigbuf: please revise your circuit, sigbuf with drive strength of 64+ requested" };
+
+ bool _out;
+
+/* -- there should be a better way to do this. --*/ 
+
+ [ N < 4 -> in = out;
+ [] else ->
+      sigbuf<N/8> sb(in);
+      prs {
+      	 sb.out => _out-
+	       _out   => out-
+      }
+      [ N < 6 -> 
+          sizing {
+            leak_adjust <- 1; 
+      	    _out {-1}; out {-4}
+         }
+      [] N = 6 ->
+          sizing {
+            leak_adjust <- 1; 
+      	    _out {-2}; out {-6,2}
+         }
+      [] (N >= 7 & N < 10) ->
+          sizing {
+            leak_adjust <- 1; 
+      	    _out {-2}; out {-8,2}
+         }
+      [] (N >= 10 & N < 14) ->
+          sizing {
+            leak_adjust <- 1; 
+      	    _out {-3}; out {-12,3}
+         }
+      [] (N >= 14 & N < 20) ->
+          sizing {
+            leak_adjust <- 1; 
+      	    _out {-4}; out {-16,4}
+         }
+      [] (N >= 20 & N < 28) ->
+          sizing {
+            leak_adjust <- 1; 
+      	    _out {-6,2}; out {-24,6}
+         }
+      [] (N >= 28 & N < 40) ->
+          sizing {
+            leak_adjust <- 1; 
+      	    _out {-8,2}; out {-32,8}
+         }
+      [] (N >= 40 & N < 56) ->
+          sizing {
+            leak_adjust <- 1; 
+      	    _out {-12,3}; out {-48,12}
+         }
+      [] else ->
+        sizing {
+          leak_adjust <- 1; 
+          _out {-N/4,(N/16)}; out {-N,(N/4)}
+        }
+      ]
+ ]
+}
+
+}
+
+}

@@ -15,9 +15,9 @@
 #  limitations under the License.
 #  
 #-------------------------------------------------------------------------
-TARGETACT=_all_.act channel.act data.act func.act cells.act
-SUBDIRS=io gates
-TARGETACTSUBDIR=std
+TARGETACT=_all_.act treegates.act
+
+TARGETACTSUBDIR=std/gates
 
 include $(ACT_HOME)/scripts/Makefile.std
 
