@@ -25,7 +25,7 @@ export namespace gates {
 /*
  * Build an OR-gate tree (NOR/NAND/optional INV)
  */
-export template<pint N>
+export template<pint N; pbool invert>
 defproc ortree (bool? in[N]; bool out)
 {
   bool tout;
@@ -86,6 +86,8 @@ defproc ortree (bool? in[N]; bool out)
       end = end+j;
       j = 0;
   ]
+
+  isinv = invert ? ~isinv : isinv;
 
   /*-- invert the signal if needed --*/
   [isinv -> prs { tmp[end] => out- } 
