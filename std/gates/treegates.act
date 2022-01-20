@@ -172,8 +172,8 @@ defproc ctree (bool? in[N]; bool out)
   ]
 }
 
-export template<pint N>
-defproc sigbuf (bool in; bool out[N])
+export template<pint PNRAT, N>
+defproc sigbuf_gen (bool in; bool out[N])
 {
   bool _out;
 
@@ -192,52 +192,61 @@ defproc sigbuf (bool in; bool out[N])
 	[ N < 4 ->
 	  sizing {
 	    leak_adjust <- 1;
+	    p_n_mode <- PNRAT;
 	    _out {-1}; out[0] {-2}
 	  }
 	 [] N >= 4 & N < 6 -> 
           sizing {
             leak_adjust <- 1; 
+	    p_n_mode <- PNRAT;
       	    _out {-1}; out[0] {-4}
          }
 	 [] N = 6 ->
           sizing {
             leak_adjust <- 1; 
+	    p_n_mode <- PNRAT;
 	    _out {-2}; out[0] {-6,2}
          }
 	 [] N >= 7 & N < 10 ->
           sizing {
             leak_adjust <- 1; 
+	    p_n_mode <- PNRAT;
       	    _out {-2}; out[0] {-8,2}
          }
 	 [] N >= 10 & N < 14 ->
           sizing {
             leak_adjust <- 1; 
+	    p_n_mode <- PNRAT;
       	    _out {-3}; out[0] {-12,3}
          }
 	 [] else ->
           sizing {
             leak_adjust <- 1; 
+	    p_n_mode <- PNRAT;
       	    _out {-4}; out[0] {-16,4}
 	  }
 	 ]
      [] else ->
        /* generate sized driver for N/32 outputs */
        pint C = (N+31)/32;
-       sigbuf<C> sb(in);
+       sigbuf_gen<PNRAT,C> sb(in);
    
       /* add a 32-way driver for the rest, with the last one with
 	 potentially lower fanout */
       (i:C-1:
-              sigbuf<32> sb2[i..i];
+              sigbuf_gen<PNRAT,32> sb2[i..i];
               sb2[i].in=sb.out[i];
 	      sb2[i].out=out[i*32..i*32+31];
        )
-       sigbuf<N-(C-1)*32> sb3;
+       sigbuf_gen<PNRAT,N-(C-1)*32> sb3;
        sb3.in = sb.out[C-1];
        sb3.out=out[(C-1)*32..N-1];
     ]
  ]
 }
+
+export defproc sigbuf <: sigbuf_gen<0> () { }
+export defproc sigbufa <: sigbuf_gen<1> () { }
 
 }
 
