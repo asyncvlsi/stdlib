@@ -175,46 +175,52 @@ defproc ctree (bool? in[N]; bool out)
 export template<pint N>
 defproc sigbuf (bool in; bool out[N])
 {
-{ N >= 0 : "sigbuf: parameter error" };
+  bool _out;
+
+  { N >= 0 : "sigbuf: parameter error" };
 
 /* -- there should be a better way to do this. --*/ 
-
- [ N < 4 -> (i:N: out[i] = in;)
- [] N <= 32 ->
-      /* -- just use a sized driver here -- */
-      bool _out;
-      prs {
-	in => _out-
-	_out => out[0]-
-      }
-      (i:N-1:out[i+1]=out[0];)
-      [ N < 6 -> 
+ [ N < 2 -> (i:N: out[i] = in;)
+ [] else ->
+     [  N <= 32 ->
+	prs {
+	 in => _out-
+	 _out => out[0]-
+	}
+	  /* -- just use a sized driver here -- */
+	(i:N-1:out[i+1]=out[0];)
+	[ N < 4 ->
+	  sizing {
+	    leak_adjust <- 1;
+	    _out {-1}; out[0] {-2}
+	  }
+	 [] N >= 4 & N < 6 -> 
           sizing {
             leak_adjust <- 1; 
       	    _out {-1}; out[0] {-4}
          }
-      [] N = 6 ->
+	 [] N = 6 ->
           sizing {
             leak_adjust <- 1; 
 	    _out {-2}; out[0] {-6,2}
          }
-      [] (N >= 7 & N < 10) ->
+	 [] N >= 7 & N < 10 ->
           sizing {
             leak_adjust <- 1; 
       	    _out {-2}; out[0] {-8,2}
          }
-      [] (N >= 10 & N < 14) ->
+	 [] N >= 10 & N < 14 ->
           sizing {
             leak_adjust <- 1; 
       	    _out {-3}; out[0] {-12,3}
          }
-      [] else ->
+	 [] else ->
           sizing {
             leak_adjust <- 1; 
       	    _out {-4}; out[0] {-16,4}
-         }
-      ]
-  [] else ->
+	  }
+	 ]
+     [] else ->
        /* generate sized driver for N/32 outputs */
        pint C = (N+31)/32;
        sigbuf<C> sb(in);
@@ -229,7 +235,8 @@ defproc sigbuf (bool in; bool out[N])
        sigbuf<N-(C-1)*32> sb3;
        sb3.in = sb.out[C-1];
        sb3.out=out[(C-1)*32..N-1];
- ] 
+    ]
+ ]
 }
 
 }
