@@ -19,18 +19,37 @@
  **************************************************************************
  */
 
-import globals;
+/*------------------------------------------------------------------------
+ *
+ *  Standard memory
+ *
+ *   Commands: 0 = write, 1 = read, 2 = read-modify-write
+ *
+ *------------------------------------------------------------------------
+ */
 
-/* Global series/parallel reset signal
-  
-   Reset protocol:
-	1. Assert fReset and sReset
-	2. De-assert fReset
-	3. De-assert sReset
+import "std/func.act";
 
-   Importing this file automatically connects "Reset" to "sReset"
-   [i.e. the "last" Reset- transition]
-*/
+namespace mem {
 
-bool fReset, sReset;
-sReset = Reset;
+export template<pint N, W>
+defproc mem (chan?(int<2>) rd; chan?(int<std::ceil_log2(N)>) addr;
+             chan?(int<W>) din;
+             chan!(int<W>) dout)
+{
+  pint bits = std::ceil_log2(N);
+  int<W> m[N];
+  int<bits> a;
+  int<2> b;
+
+  chp {
+      *[ addr?a,rd?b;
+         [ b=0 -> din?m[a]
+        [] b=1 -> dout!m[a]
+        [] b=2 -> dout!m[a]; din?m[a]
+         ]
+       ]
+    }
+}
+
+}
