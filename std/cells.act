@@ -359,7 +359,46 @@ export defcell LATCH (bool? CLK, D; bool! Q)
   }
   sizing { _clk{-2}; Q{-2} }
 }
+
+export defcell LATCHLO (bool? R, CLK, D; bool! Q)
+{
+  bool _q, _clk;
+  prs {
+    CLK => _clk-
+
+   [keeper=0] D<10> & CLK -> _q-
+   ~D<20> & ~_clk -> _q+
+
+   //feedback
+  [iskeeper=1;keeper=0] ~Q<10> & ~CLK -> _q+    
+  [iskeeper=1] Q<10> & _clk -> _q-
+
+    _q | R -> Q-
+    ~_q & ~R -> Q+
+  }
+  sizing { _clk{-2}; Q{-2} }
+}
  
+export defcell LATCHHI (bool? S, CLK, D; bool! Q)
+{
+  bool _q, _clk;
+  prs {
+    CLK => _clk-
+
+   [keeper=0] D<10> & CLK -> _q-
+   ~D<20> & ~_clk -> _q+
+
+   //feedback
+  [iskeeper=1;keeper=0] ~Q<10> & ~CLK -> _q+    
+  [iskeeper=1] Q<10> & _clk -> _q-
+
+    S => _s
+    _q & _s -> Q-
+    ~_q | ~_s -> Q+
+  }
+  sizing { _clk{-2}; Q{-2} }
+}
+
 }
 
 }
