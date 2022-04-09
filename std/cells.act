@@ -360,7 +360,7 @@ export defcell LATCH (bool? CLK, D; bool! Q)
   sizing { _clk{-2}; Q{-2} }
 }
 
-export defcell LATCHLO (bool? CLK, D; bool! Q)
+export defcell LATCHLO (bool? R, CLK, D; bool! Q)
 {
   bool _q, _clk;
   prs {
@@ -373,13 +373,13 @@ export defcell LATCHLO (bool? CLK, D; bool! Q)
   [iskeeper=1;keeper=0] ~Q<10> & ~CLK -> _q+    
   [iskeeper=1] Q<10> & _clk -> _q-
 
-    _q | Reset -> Q-
-    ~_q & ~Reset -> Q+
+    _q | R -> Q-
+    ~_q & ~R -> Q+
   }
   sizing { _clk{-2}; Q{-2} }
 }
  
-export defcell LATCHHI (bool? CLK, D; bool! Q)
+export defcell LATCHHI (bool? S, CLK, D; bool! Q)
 {
   bool _q, _clk;
   prs {
@@ -392,9 +392,9 @@ export defcell LATCHHI (bool? CLK, D; bool! Q)
   [iskeeper=1;keeper=0] ~Q<10> & ~CLK -> _q+    
   [iskeeper=1] Q<10> & _clk -> _q-
 
-    Reset => _reset
-    _q & _reset -> Q-
-    ~_q | ~_reset -> Q+
+    S => _s
+    _q & _s -> Q-
+    ~_q | ~_s -> Q+
   }
   sizing { _clk{-2}; Q{-2} }
 }
