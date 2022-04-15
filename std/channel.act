@@ -59,6 +59,8 @@ import "std/func.act";
  *                   exists
  *
  *
+ *    ledr : transition-signaling four state channel (a.k.a. LEDR) channel
+ *
  *
  *  Multi-bit DI channels
  *
@@ -78,6 +80,7 @@ import "std/func.act";
  *    
  *  pull_[r]bd<M> : bundled-data pull-type M-bit channel, .r driven by receiver
  *
+ *  ts_[r]bd<M> : transition-signalling bundled-data M-bit channel
  *
  *------------------------------------------------------------------------
  */
@@ -864,6 +867,142 @@ defchan gen_pMbd <: chan(int<M>) (bool?! d[M]; bool!? r; bool?! a)
 }
 export defchan pull_bd <: gen_pMbd<false,0> () { }
 export defchan pull_rbd <: gen_pMbd<true,0> () { }
+
+/*------------------------------------------------------------------------
+ *
+ *  Transition signalling bundled data
+ *
+ *------------------------------------------------------------------------
+ */
+
+template<pbool reset; pint V; pint M>
+defchan gen_ts_Mbd <: chan(int<M>) (bool?! d[M]; bool?! r; bool!? a)
+{
+  { 0 <= V & std::ceil_log2(V) < M : "Initial token value out of range" };
+
+  spec {
+    /* timing fork */
+    timing a- : d* < r*+
+    timing a+ : d* < r*-
+  }
+  
+  methods {
+    /*-- initialize channel, sender end --*/
+    send_init {
+      [ reset -> (,i:M: [ ((V >> i) & 1) = 0 -> d[i]- [] else -> d[i]+ ])
+     [] else -> (,i:M: d[i]-)
+      ];r-
+    }
+
+    /*-- set output data --*/
+    set {
+      (,i:M: [((self >> i) & 1) = 0 -> d[i]- [] else -> d[i]+ ]);
+      [r->r- [] ~r -> r+]
+    }
+
+    /*-- finish synchronization --*/
+    send_up {
+      [a&r|~a&~r]
+    }
+
+    /*-- reset part of the protocol --*/
+    send_rest {
+      skip
+    }
+
+    /*-- initialize channel, receiver end --*/
+    recv_init {
+      a-
+    }
+
+    /*-- get value --*/
+    get {
+      [r&~a|~r&a];
+      self := 0;
+      (;i:M: self := self | (int(d[i]) << i))
+    }
+
+    /*-- finish synchronization action --*/
+    recv_up {
+      [a->a-[]~a->a+]
+    }
+
+    /*-- reset part of the protocol --*/
+    recv_rest {
+      skip
+    }
+
+    /*-- probe expression on receiver --*/
+    recv_probe = r&~a|~r&a;
+
+    // no sender probe
+  }
+}
+
+export defchan ts_bd <: gen_Mbd<false,0> () { }
+export defchan ts_rbd <: gen_Mbd<true,0> () { }
+
+
+
+/*------------------------------------------------------------------------
+ *
+ * Four state coding (LEDR) : transition signalling one-bit DI channel
+ *
+ *------------------------------------------------------------------------
+ */
+export
+defchan ledr <: chan(bool) (bool?! data, rep; bool!? a)
+{
+  methods {
+    /*-- initialize channel, sender end --*/
+    send_init {
+      data-,rep-
+    }
+
+    /*-- set output data --*/
+    set {
+      [self&data|~self&~data-> [rep->rep-[]~rep->rep+]
+      [] else -> [data->data-[]~data->data+]
+      ]		  
+    }
+
+    /*-- finish synchronization --*/
+    send_up {
+      [~a&~(data&~rep|~data&rep)|a&(data&~rep|~data&rep)]
+    }
+
+    /*-- reset part of the protocol --*/
+    send_rest {
+      skip
+    }
+
+    /*-- initialize channel, receiver end --*/
+    recv_init {
+      a-
+    }
+
+    /*-- get value --*/
+    get {
+      [~a&~(data&~rep|~data&rep)|a&(data&~rep|~data&rep)];
+      [data->self+[]~data->self-]
+    }
+
+    /*-- finish synchronization action --*/
+    recv_up {
+      [a->a-[]~a->a+]
+    }
+
+    /*-- reset part of the protocol --*/
+    recv_rest {
+      skip
+    }
+
+    /*-- probe expression on receiver --*/
+    recv_probe = ~a&~(data&~rep|~data&rep)|a&(data&~rep|~data&rep);
+
+    // no sender probe
+  }
+}
 
 
 }
