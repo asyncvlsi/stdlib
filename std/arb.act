@@ -49,10 +49,15 @@ export defcell raw_arbiter(bool? a, b; bool! u, v)
     b & _u => _v-
 
    /* output filter */
-    [keeper=0] _u -> u-
-    [keeper=0] _v -> v-
-    passp(_u,_v,u)
-    passp(_v,_u,v)
+    [keeper=0] _u<5> -> u-
+    [keeper=0] _v<5> -> v-
+    passp<10>(_u,_v,u)
+    passp<10>(_v,_u,v)
+  }
+  sizing {
+   leak_adjust <- 1;
+   _u{-1};
+   _v{-1}
   }
 }
 
