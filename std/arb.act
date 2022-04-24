@@ -34,7 +34,7 @@ import std::gates;
 namespace std {
 
   /* two-input arbiter, ala Seitz */
-export defproc raw_arbiter(bool? a, b; bool! u, v) 
+export defcell raw_arbiter(bool? a, b; bool! u, v) 
 {
   bool _u, _v;
 
@@ -51,8 +51,8 @@ export defproc raw_arbiter(bool? a, b; bool! u, v)
    /* output filter */
     [keeper=0] _u -> u-
     [keeper=0] _v -> v-
-    passp(_u,v,u)
-    passp(_v,u,v)
+    passp(_u,_v,u)
+    passp(_v,_u,v)
   }
 }
 
@@ -67,8 +67,8 @@ export defproc raw_arbiter(bool? a, b; bool! u, v)
  *------------------------------------------------------------------------
  */
 export template<pint N, M>
-defproc arbiter(chan(int<N>) A; chan(int<M>) B; chan(int<N>) Ap;
-		chan(int<M>) Bp)
+defproc arbiter(chan?(int<N>) A; chan?(int<M>) B; chan!(int<N>) Ap;
+		chan!(int<M>) Bp)
 {
   chp {
     *[[| #A -> Ap!A;A?
