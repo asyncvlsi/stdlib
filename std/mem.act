@@ -55,6 +55,7 @@ defproc ram (chan?(int<2>) rd; chan?(int<std::ceil_log2(N)>) addr;
 
 /*-- built-in ROM (max 64 bit) --*/
 export function read_rom(int<32> idx) : int<64>;
+export function close_rom(int<32> idx) : int<64>;
 
 export template<pint ID, N,W>
 defproc rom (chan?(int<std::ceil_log2(N)>) addr; chan!(int<W>) dout)
@@ -65,6 +66,7 @@ defproc rom (chan?(int<std::ceil_log2(N)>) addr; chan!(int<W>) dout)
      /* initialize the ROM content from a file */
      a := 0;
      *[ m[a] := read_rom(ID); a := a + 1 <- a != 0 & a < N ];
+     a := close_rom(ID);
      *[ addr?a; dout!m[a] ]
    }
 }
