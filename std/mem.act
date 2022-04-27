@@ -30,10 +30,10 @@
 
 import "std/func.act";
 
-namespace mem {
+namespace std {
 
 export template<pint N, W>
-defproc mem (chan?(int<2>) rd; chan?(int<std::ceil_log2(N)>) addr;
+defproc ram (chan?(int<2>) rd; chan?(int<std::ceil_log2(N)>) addr;
              chan?(int<W>) din;
              chan!(int<W>) dout)
 {

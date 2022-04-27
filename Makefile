@@ -17,7 +17,7 @@
 #-------------------------------------------------------------------------
 TARGETACT=globals.act spreset.act
 
-SUBDIRS=std mem
+SUBDIRS=std
 
 include $(ACT_HOME)/scripts/Makefile.std
 

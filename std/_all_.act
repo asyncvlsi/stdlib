@@ -33,3 +33,4 @@ import "std/func.act";
 import std::data;
 import std::channel;
 import "std/arb.act";
+import "std/mem.act";
