@@ -136,6 +136,14 @@ export defcell NOR2X1 (bool? A, B; bool! Y)
   sizing { Y {-1} }
 }
   
+export defcell NOR2X2 (bool? A, B; bool! Y)
+{
+  prs {
+     A | B => Y-
+  }
+  sizing { Y {-2} }
+}
+  
 export defcell NOR3X1 (bool? A, B, C; bool! Y)
 {
   prs {
@@ -170,6 +178,14 @@ export defcell NAND2X1 (bool? A, B; bool! Y)
     A & B => Y-
   }
   sizing { Y{-1} }
+}
+  
+export defcell NAND2X2 (bool? A, B; bool! Y)
+{
+  prs {  
+    A & B => Y-
+  }
+  sizing { Y{-2} }
 }
   
 export defcell NAND3X1 (bool? A, B, C; bool! Y)
@@ -384,23 +400,15 @@ export defproc LATCHLO (bool? R, CLK, D; bool! Q)
 {
   bool _q;
   LATCHINV l(CLK,D,_q);
-  prs {
-    _q | R -> Q-
-    ~_q & ~R -> Q+
-  }
-  sizing { Q{-2} }
+  NOR2X2 nx(_q,R,Q);
 }
  
-export defcell LATCHHI (bool? S, CLK, D; bool! Q)
+export defproc LATCHHI (bool? S, CLK, D; bool! Q)
 {
   bool _s, _q;
   LATCHINV l(CLK,D,_q);
-  prs {
-    S => _s-
-    _q & _s -> Q-
-    ~_q | ~_s -> Q+
-  }
-  sizing { Q{-2} }
+  INVX1 ix(S,_s);
+  NAND2X2 nx(_q,_s,Q);
 }
 
 }
