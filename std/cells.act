@@ -376,7 +376,7 @@ export defcell LATCHINV (bool? CLK, D; bool! _q)
   _q => q-
 
   }
-  sizing { _clk{-2}; _q{-1} }
+  sizing { _clk{-2}; q{-1} }
 }
 
 
