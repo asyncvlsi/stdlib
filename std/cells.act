@@ -360,9 +360,9 @@ export defcell LATCH (bool? CLK, D; bool! Q)
   sizing { _clk{-2}; Q{-2} }
 }
 
-export defcell LATCHLO (bool? R, CLK, D; bool! Q)
+export defcell LATCHINV (bool? CLK, D; bool! _q)
 {
-  bool _q, _clk;
+  bool _clk, q;
   prs {
     CLK => _clk-
 
@@ -370,33 +370,37 @@ export defcell LATCHLO (bool? R, CLK, D; bool! Q)
    ~D<20> & ~_clk -> _q+
 
    //feedback
-  [iskeeper=1;keeper=0] ~Q<10> & ~CLK -> _q+    
-  [iskeeper=1] Q<10> & _clk -> _q-
+  [iskeeper=1;keeper=0] ~q<10> & ~CLK -> _q+
+  [iskeeper=1] q<10> & _clk -> _q-
 
+  _q => q-
+
+  }
+  sizing { _clk{-2}; _q{-1} }
+}
+
+
+export defproc LATCHLO (bool? R, CLK, D; bool! Q)
+{
+  bool _q;
+  LATCHINV l(CLK,D,_q);
+  prs {
     _q | R -> Q-
     ~_q & ~R -> Q+
   }
-  sizing { _clk{-2}; Q{-2} }
+  sizing { Q{-2} }
 }
  
 export defcell LATCHHI (bool? S, CLK, D; bool! Q)
 {
-  bool _s, _q, _clk;
+  bool _s, _q;
+  LATCHINV l(CLK,D,_q);
   prs {
-    CLK => _clk-
-
-   [keeper=0] D<10> & CLK -> _q-
-   ~D<20> & ~_clk -> _q+
-
-   //feedback
-  [iskeeper=1;keeper=0] ~Q<10> & ~CLK -> _q+    
-  [iskeeper=1] Q<10> & _clk -> _q-
-
     S => _s-
     _q & _s -> Q-
     ~_q | ~_s -> Q+
   }
-  sizing { _clk{-2}; Q{-2} }
+  sizing { Q{-2} }
 }
 
 }

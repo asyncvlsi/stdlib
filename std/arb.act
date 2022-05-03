@@ -24,7 +24,11 @@
  *  Standard components for non-deterministic selection
  *
  *        arbiter : two-input arbiter
- *    raw_arbiter : circuit implementation of standard arbiter
+ *    buf_arbiter : circuit implementation of a standard (buffered) arbiter
+ *  ideal_arbiter : circuit implementation of an ideal arbiter
+ *
+ *  For definitions of a buffered/standard arbiter and their subtle
+ *  differences, see doi: 10.1109/TCSI.2020.3011552
  *
  *------------------------------------------------------------------------
  */
@@ -33,8 +37,8 @@ import std::gates;
 
 namespace std {
 
-  /* two-input arbiter, ala Seitz */
-export defcell raw_arbiter(bool? a, b; bool! u, v) 
+/* two-input arbiter, ala Seitz */
+export defcell buf_arbiter(bool? a, b; bool! u, v) 
 {
   bool _u, _v;
 
@@ -60,6 +64,51 @@ export defcell raw_arbiter(bool? a, b; bool! u, v)
    _v{-1}
   }
 }
+
+/* two-input ideal arbiter */
+export defcell ideal_arbiter(bool? a, b; bool! u, v) 
+{
+  bool _u, _v;
+
+  /* force exclusive low signals for simulation */
+  spec {
+    mk_excllo(_u,_v)
+  }
+  
+  prs {
+    /* cross coupled nand gates */
+    a & _v => _u-
+    b & _u => _v-
+  }
+
+   /* output filter */
+  prs <_v> {
+    [keeper=0] _u | v => u-
+  }
+  prs <_u> {
+    [keeper=0] _v | u => v-
+  }
+  sizing {
+   leak_adjust <- 1;
+   _u{-1}; _v{-1};
+   u{-1}; v{-1}
+  }
+}
+
+export 
+defproc maybe_execute(channel::e1of1? A; channel::e1of1! S; bool! uA)
+{
+  ideal_arbiter ia(S.e,A.r,S.r,uA);
+  prs {
+   uA & S.e => A.e-
+  }
+  sizing {
+    leak_adjust <- 1; 
+    A.e {-1}
+  }
+}
+
+/*------------------------------------------------------------------------
 
 
 /*------------------------------------------------------------------------

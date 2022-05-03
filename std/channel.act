@@ -60,6 +60,7 @@ import "std/func.act";
  *
  *
  *    ledr : transition-signaling four state channel (a.k.a. LEDR) channel
+ *   xledr : ledr exchange channel
  *
  *
  *  Multi-bit DI channels
@@ -999,6 +1000,64 @@ defchan ledr <: chan(bool) (bool?! data, rep; bool!? a)
 
     /*-- probe expression on receiver --*/
     recv_probe = ~a&~(data&~rep|~data&rep)|a&(data&~rep|~data&rep);
+
+    // no sender probe
+  }
+}
+
+
+export
+defchan xledr <: chan(bool,bool) (bool?! data, rep; bool!? ackdata,ackrep)
+{
+  methods {
+    /*-- initialize channel, sender end --*/
+    send_init {
+      data-,rep-
+    }
+
+    /*-- set output data --*/
+    set {
+      [self&data|~self&~data-> [rep->rep-[]~rep->rep+]
+      [] else -> [data->data-[]~data->data+]
+      ]		  
+    }
+
+    /*-- finish synchronization --*/
+    send_up {
+      [(ackdata&ackrep|~ackdata&~ackrep)&~(data&~rep|~data&rep)|(ackdata&~ackrep|~ackdata&ackrep) &(data&~rep|~data&rep)];
+      selfack := ackdata
+    }
+
+    /*-- reset part of the protocol --*/
+    send_rest {
+      skip
+    }
+
+    /*-- initialize channel, receiver end --*/
+    recv_init {
+      ackdata-,ackrep-
+    }
+
+    /*-- get value --*/
+    get {
+      [(ackdata&ackrep|~ackdata&~ackrep)&~(data&~rep|~data&rep)|(ackdata&~ackrep|~ackdata&ackrep)&(data&~rep|~data&rep)];
+      [data->self+[]~data->self-]
+    }
+
+    /*-- finish synchronization action --*/
+    recv_up {
+      [selfack&ackdata|~selfack&~ackdata-> [ackrep->ackrep-[]~ackrep->ackrep+]
+      [] else -> [ackdata->ackdata- [] ~ackdata->ackdata+]
+      ]	  
+    }
+
+    /*-- reset part of the protocol --*/
+    recv_rest {
+      skip
+    }
+
+    /*-- probe expression on receiver --*/
+    recv_probe = (ackdata&ackrep|~ackdata&~ackrep)&~(data&~rep|~data&rep)|(ackdata&~ackrep|~ackdata&ackrep) &(data&~rep|~data&rep);
 
     // no sender probe
   }
