@@ -390,7 +390,7 @@ export defcell LATCHINV (bool? CLK, D, q; bool! _q)
   [iskeeper=1] q<10> & _clk -> _q-
 
   }
-  sizing { _clk{-2}; q{-1} }
+  sizing { _clk{-2} }
 }
 
 
