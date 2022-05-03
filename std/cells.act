@@ -376,9 +376,9 @@ export defcell LATCH (bool? CLK, D; bool! Q)
   sizing { _clk{-2}; Q{-2} }
 }
 
-export defcell LATCHINV (bool? CLK, D; bool! _q)
+export defcell LATCHINV (bool? CLK, D, q; bool! _q)
 {
-  bool _clk, q;
+  bool _clk;
   prs {
     CLK => _clk-
 
@@ -389,24 +389,22 @@ export defcell LATCHINV (bool? CLK, D; bool! _q)
   [iskeeper=1;keeper=0] ~q<10> & ~CLK -> _q+
   [iskeeper=1] q<10> & _clk -> _q-
 
-  _q => q-
-
   }
-  sizing { _clk{-2}; q{-1} }
+  sizing { _clk{-2} }
 }
 
 
 export defproc LATCHLO (bool? R, CLK, D; bool! Q)
 {
   bool _q;
-  LATCHINV l(CLK,D,_q);
+  LATCHINV l(CLK,D,Q,_q);
   NOR2X2 nx(_q,R,Q);
 }
  
 export defproc LATCHHI (bool? S, CLK, D; bool! Q)
 {
   bool _s, _q;
-  LATCHINV l(CLK,D,_q);
+  LATCHINV l(CLK,D,Q,_q);
   INVX1 ix(S,_s);
   NAND2X2 nx(_q,_s,Q);
 }
