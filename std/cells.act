@@ -44,8 +44,8 @@ export defcell TIELOX1 (bool! Y)
     rand_init (x)
   }
   prs {
-    [keeper=0] x -> Y-
-    [keeper=0] ~x -> x+
+    [keeper=2] x -> Y-
+    [keeper=2] ~x -> x+
   }
 }
 
@@ -56,8 +56,8 @@ export defcell TIEHIX1 (bool! Y)
     rand_init (x)
   }
   prs {
-    [keeper=0] ~x -> Y+
-    [keeper=0] x -> x-
+    [keeper=2] ~x -> Y+
+    [keeper=2] x -> x-
   }
 }
 
@@ -223,7 +223,7 @@ export defcell XOR2X1 (bool? A, B; bool! Y)
      A => _A-
      B => _B-
 
-    [keeper=0] ~B & ~_A | ~_B & ~A -> Y+
+    [keeper=2] ~B & ~_A | ~_B & ~A -> Y+
      _B & _A | B & A -> Y-
    }
    sizing { _A{-1}; _B{-1}; Y{-1} }
@@ -236,7 +236,7 @@ export defcell XNOR2X1 (bool? A, B; bool! Y)
      A => _A-
      B => _B-
 
-    [keeper=0] ~B & ~A | ~_B & ~_A -> Y+
+    [keeper=2] ~B & ~A | ~_B & ~_A -> Y+
      B & _A | _B & A -> Y-
    }
    sizing { _A{-1}; _B{-1}; Y{-1} }
@@ -249,7 +249,7 @@ export defcell MUX2X1 (bool? A, B, S; bool! Y)
    prs {
      S => _S-
 
-    [keeper=0] ~A & ~_S | ~B & ~S -> Y+
+    [keeper=2] ~A & ~_S | ~B & ~S -> Y+
      A & S | B & _S -> Y-
    }
    sizing { _S{-1}; Y{-1} }
