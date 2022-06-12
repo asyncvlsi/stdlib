@@ -940,8 +940,8 @@ defchan gen_ts_Mbd <: chan(int<M>) (bool?! d[M]; bool?! r; bool!? a)
   }
 }
 
-export defchan ts_bd <: gen_Mbd<false,0> () { }
-export defchan ts_rbd <: gen_Mbd<true,0> () { }
+export defchan ts_bd <: gen_ts_Mbd<false,0> () { }
+export defchan ts_rbd <: gen_ts_Mbd<true,0> () { }
 
 
 
