@@ -1,0 +1,129 @@
+/*************************************************************************
+ *
+ *  This file is part of ACT standard library
+ *
+ *  Copyright (c) 2022 Rajit Manohar
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ **************************************************************************
+ */
+
+
+/*------------------------------------------------------------------------
+ *
+ *
+ *  Simple fixed point math library
+ *
+ *    Functions take two parameters, using the standard Q-format
+ *    Q(A,B) = A digits for integer part, B digits for fractional
+ *    part. The representation uses 2's complement for negative
+ *    numbers, so add/sub are the same for signed and unsigned
+ *    arithmetic. Signed and unsigned flavors of multiply and divide
+ *    are provided.
+ *
+ *    All arguments to functions are integers with bit-width A+B:
+ *
+ *         add<A,B> (x,y) : returns "x + y"
+ *         sub<A,B> (x,y) : returns "x - y"
+ *
+ *    Unsigned ops:
+ *
+ *         multu<A,B> (x,y) : returns "x * y" (unsigned)
+ *          divu<A,B> (x,y) : returns "x / y" (unsigned)
+ *
+ *    Signed ops:
+ *
+ *         mults<A,B> (x,y) : returns "x * y" (signed)
+ *          divs<A,B> (x,y) : returns "x / y" (signed)
+ *        uminus<A,B> (x)   : returns "-x"
+ *
+ *------------------------------------------------------------------------
+ */
+
+namespace math {
+  export namespace fxp {
+
+    export
+    template<pint A,B>
+    function add (int<A+B> x, y) : int<A+B>
+    {
+      chp {
+        self := x + y
+      }
+    }
+
+    export
+    template<pint A,B>
+    function sub (int<A+B> x, y) : int<A+B>
+    {
+      chp {
+        self := x - y
+      }
+    }
+
+    export
+    template<pint A,B>
+    function mults (int<A+B> x, y) : int<A+B>
+    {
+      bool sx, sy;
+      chp {
+	[ x{A+B-1} = 1 -> sx+; x := ~x + 1 [] else -> sx- ];
+	[ y{A+B-1} = 1 -> sy+; y := ~y + 1 [] else -> sy- ];
+        self := (x * y) >> B;
+	[ sx != sy -> self := ~self + 1 [] else -> skip ]
+      }
+    }
+
+    export
+    template<pint A,B>
+    function multu (int<A+B> x, y) : int<A+B>
+    {
+      chp {
+        self := (x * y) >> B
+      }
+    }
+	   
+    export
+    template<pint A,B>
+    function divs (int<A+B> x, y) : int<A+B>
+    {
+      bool sx, sy;
+      chp {
+	[ x{A+B-1} = 1 -> sx+; x := ~x + 1 [] else -> sx- ];
+	[ y{A+B-1} = 1 -> sy+; y := ~y + 1 [] else -> sy- ];
+        self := (x << B) / y;
+	[ sx != sy -> self := ~self + 1 [] else -> skip ]
+      }
+    }
+	   
+    export
+    template<pint A,B>
+    function divu (int<A+B> x, y) : int<A+B>
+    {
+      chp {
+        self := (x << B) / y
+      }
+    }
+
+    export
+    template<pint A,B>
+    function uminus (int<A+B> x) : int<A+B>
+    {
+      chp {
+        self := ~x + 1
+      }
+    }
+
+  }
+}

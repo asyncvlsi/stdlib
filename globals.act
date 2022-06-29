@@ -25,7 +25,15 @@
  *
  */
 
+pint SIG_POWER = 0,
+     SIG_GROUND = 1,
+     SIG_RESET = 2;
+
 bool Vdd, GND, Reset;
+
+Vdd @ [sigtype = SIG_POWER];
+GND @ [sigtype = SIG_GROUND];
+Reset @ [sigtype = SIG_RESET];
 
 /* to turn off the warning */
 namespace globals { }

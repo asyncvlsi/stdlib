@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------
 #
-#  Copyright (c) 2021 Rajit Manohar
+#  Copyright (c) 2022 Rajit Manohar
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -15,9 +15,8 @@
 #  limitations under the License.
 #  
 #-------------------------------------------------------------------------
-TARGETACT=globals.act spreset.act
-
-SUBDIRS=std math
+TARGETACT=fxp.act
+TARGETACTSUBDIR=math
 
 include $(ACT_HOME)/scripts/Makefile.std
 
