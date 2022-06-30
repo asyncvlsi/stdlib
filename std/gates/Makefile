@@ -15,7 +15,7 @@
 #  limitations under the License.
 #  
 #-------------------------------------------------------------------------
-TARGETACT=_all_.act treegates.act
+TARGETACT=_all_.act treegates.act decoder.act
 
 TARGETACTSUBDIR=std/gates
 

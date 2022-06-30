@@ -1,0 +1,91 @@
+/*************************************************************************
+ *
+ *  This file is part of ACT standard library
+ *
+ *  Copyright (c) 2022 Rajit Manohar
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ **************************************************************************
+ */
+import "std/gates/treegates.act";
+
+namespace std {
+
+export namespace gates {
+
+ template<pint K; pbool inv>
+ defproc _decoder(bool? in[K]; bool! out[1 << K])
+ {
+   spec {
+     hazard(out)
+   }
+   [ K < 5 ->
+     bool _in[2][K];
+     _in[int(inv)][0..K-1] = in;
+     prs * {
+       (i: K : in[i] => _in[1-int(inv)][i]-) // inverters
+     }
+     [inv ->
+      prs {
+         (i: 1 << K : (&j : K : _in[(i >> j) & 1][j]) => out[i]-)
+      }
+     [] else ->
+      prs {
+         (i: 1 << K : (|j : K : _in[(i >> j) & 1][j]) => out[i]-)
+      }
+     ]
+     sizing {
+       (;i:K:_in[1][i] {-1});
+       (;i:1<<K: out[i] {-1})
+     }
+  [] else ->
+      pint half = K/2;
+     _decoder<half,~inv> d1(in[0..half-1]);
+     _decoder<K-half,~inv> d2(in[half..K-1]);
+     std::gates::sigbuf< (1 << half) > s1[1 << (K-half)];
+     std::gates::sigbuf< (1 << (K-half)) >  s2[1 << half];
+     (i: 1 << half : d1.out[i] = s2[i].in;)
+     (i: 1 << (K-half) : d2.out[i] = s1[i].in;)
+      bool _out[1 << K];
+     [inv -> 
+      prs {
+	(i: 1 << half :
+	 (j : 1 << (K - half) :
+	  s1[j].out[i] & s2[i].out[j] => out[i+j*(1 << half)]-
+	  ))
+      }
+      [] else ->
+      prs {
+	(i: 1 << half :
+	 (j : 1 << (K - half) :
+	  s1[j].out[i] | s2[i].out[j] => out[i+j*(1 << half)]-
+	  ))
+      }
+      ]
+      sizing {
+	(;i: 1 << K : out[i]{-1})
+      }
+   ]
+ }
+	 
+
+ export template<pint K>	 
+ defproc decoder(bool? in[K]; bool! out[1 << K])
+ {
+   _decoder<K,false> d(in, out);
+ }
+
+}
+
+}

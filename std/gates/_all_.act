@@ -19,3 +19,4 @@
  **************************************************************************
  */
 import "std/gates/treegates.act";
+import "std/gates/decoder.act";
