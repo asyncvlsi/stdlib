@@ -35,7 +35,7 @@ function sign_extend (int<Worig> x) : int<Wnew>
   { Wnew >= Worig : "Sign extension used to reduce the bit-width?" };
 
   chp {
-    [ x{Worig-1} = 1 -> self := x | (~int(0,Wnew) & int(0,Worig))
+    [ x{Worig-1} = 1 -> self := x | (~int(0,Wnew) << Worig)
     [] else -> self := x
     ]		 
   }
