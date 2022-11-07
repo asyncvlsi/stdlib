@@ -48,11 +48,48 @@
  *          divs<A,B> (x,y) : returns "x / y" (signed)
  *        uminus<A,B> (x)   : returns "-x"
  *
+ *
+ *        le<A,B>(x,y) : returns true if x <= y
+ *   positive<A,B>(x)  : returns true if x > 0
+ *   negative<A,B>(x)  : returns true if x < 0
  *------------------------------------------------------------------------
  */
 
 namespace math {
   export namespace fxp {
+
+    export
+    template<pint A,B>
+    function positive(int<A+B> x) : bool
+    {
+      chp {
+        self := (x{A+B-1} = 0) & (x != 0)
+      }
+    }
+
+    export
+    template<pint A,B>
+    function negative(int<A+B> x) : bool
+    {
+      chp {
+        self := (x{A+B-1} = 1)
+      }
+    }
+
+    export
+    template<pint A,B>
+    function le(int<A+B> x, y) : bool
+    {
+      chp {
+	[ x{A+B-1} = 1 & y{A+B-1} = 0 -> self := true
+       [] y{A+B-1} = 1 & x{A+B-1} = 0 -> self := false
+       [] else ->
+	    [ x{A+B-1} = 0 -> self := (x <= y)
+            [] else -> self := (y <= x)
+	    ]
+       ]
+      }
+    }
 
     export
     template<pint A,B>
