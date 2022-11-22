@@ -101,6 +101,88 @@ defproc ortree (bool? in[N]; bool out)
   }
   ]
 }
+
+
+/*
+ * Build an AND-gate tree (NAND/NOR optional INV)
+ */
+export template<pint N; pbool invert>
+defproc andtree (bool? in[N]; bool out)
+{
+  bool tout;
+
+  { N > 0 : "What?" };
+
+  pint i, end, j;
+  pbool isinv;
+  isinv = false;
+  i = 0;
+  end = N-1;
+
+  /* dynamic array that holds all the nodes in the completion tree */
+  bool tmp[N];
+  (k:N:tmp[k] = in[k];)
+
+  /* Invariant: i <= end */
+    
+  *[ i != end ->
+     /* 
+      * Invariant: tmp[i..end] has the current signals that need to be
+      * combined together, and "isinv" specifies if they are the inverted
+      * sense or not
+      */
+     j = 0;
+     *[ i < end ->
+        /*-- there are still signals that need to be combined --*/
+        j = j + 1;
+        bool tmp[end+j..end+j];
+        [ i+2 >= end ->
+          /*-- last piece: use either a 2 or 3 input NAND/NOR gate --*/
+          [isinv ->
+            prs { (|k:i..end:tmp[k]) => tmp[end+j]- }
+          [] else ->
+            prs { (&k:i..end:tmp[k]) => tmp[end+j]- }
+          ]
+          i = end;
+        [] else ->
+          /*-- more to come; so use a two input C-element --*/
+          [isinv ->
+            prs { (|k:i..i+1:tmp[k]) => tmp[end+j]- }
+          [] else ->
+            prs { (&k:i..i+1:tmp[k]) => tmp[end+j]- }
+          ]
+          i = i + 2;
+        ]
+        sizing {
+          leak_adjust <- 1; 
+          p_n_mode <- 1;
+          tmp[end+j]{-1}
+        }
+      ]
+      /*-- we just added an inverting layer --*/
+      isinv = ~isinv;
+
+      /*-- update range that has to be combined --*/
+      i = end+1;
+      end = end+j;
+      j = 0;
+  ]
+
+  isinv = invert ? ~isinv : isinv;
+
+  /*-- invert the signal if needed --*/
+  [isinv -> prs { tmp[end] => out- } 
+  [] else -> tmp[end] = out;
+  ]
+  [isinv ->
+  sizing {
+    leak_adjust <- 1; 
+    p_n_mode <- 1;
+    out{-1}
+  }
+  ]
+}
+	 
   
 /*
  * Build a completion tree using a combination of 2-input and 3-input
