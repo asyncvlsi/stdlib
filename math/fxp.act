@@ -32,6 +32,11 @@
  *    arithmetic. Signed and unsigned flavors of multiply and divide
  *    are provided.
  *
+ *
+ *    To convert a preal constant to the fixed-point representation,
+ *    use
+ *         conv_to_fxp(A, B, value) : returns fxp representation for value
+ *
  *    All arguments to functions are integers with bit-width A+B:
  *
  *         add<A,B> (x,y) : returns "x + y"
@@ -48,7 +53,6 @@
  *          divs<A,B> (x,y) : returns "x / y" (signed)
  *        uminus<A,B> (x)   : returns "-x"
  *
- *
  *        le<A,B>(x,y) : returns true if x <= y
  *   positive<A,B>(x)  : returns true if x > 0
  *   negative<A,B>(x)  : returns true if x < 0
@@ -57,6 +61,17 @@
 
 namespace math {
   export namespace fxp {
+
+    export
+    function conv_to_fxp(pint A, B; preal v) : pint
+    {
+      chp {
+        [ v >= 0.0 -> self := int(v * (1 << B) + 0.5)
+       [] else -> self := int(-v * (1 << B) + 0.5);
+              self := (1 << (A+B)) - self
+        ]
+      }
+    }
 
     export
     template<pint A,B>
