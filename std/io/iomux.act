@@ -53,12 +53,9 @@ defproc funnel(chan?(int<W>) in[N]; chan!(int<W + std::ceil_log2(N)>) out)
 
   int<W> x;
   int<M> y;
-
-  pint X[N];
-  (i:N: X[i] = std::ceil_log2(i);)
   
   chp {
-    *[[| ([]i:N: #in[i] -> in[i]?x;y:=X[i];out!{x,y}) |]]
+    *[[| ([]i:N: #in[i] -> in[i]?x;y:=i;out!{x,y}) |]]
   }
 }
 
