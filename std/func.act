@@ -73,4 +73,19 @@ export function min(pint a, b) : pint
   }
 }
 
+export function lfsr64(int prev) : int
+{
+  int count, lfsr, bit;
+  chp {
+    lfsr := prev;
+    count := 0;
+    *[ count < 64 ->
+      bit := ((lfsr >> 63) ^ (lfsr >> 3) ^ (lfsr >> 2) ^ (lfsr >> 0)) & 1;
+      lfsr := (lfsr >> 1) | (bit << 63);
+      count := count + 1
+    ];
+    self := lfsr
+  }
+}
+
 }
