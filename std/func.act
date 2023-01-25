@@ -53,8 +53,8 @@ export function ceil_log2 (pint a) : pint
   pint M;
   chp {
      i := 0;
-     M := a;
-    *[ M > 1 -> i := i + 1; M := (M+1)/2 ];
+     M := a-1;
+    *[ M > 0 -> i := i + 1; M := M/2 ];
      self := i
   }
 }
