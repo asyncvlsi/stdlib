@@ -73,4 +73,35 @@ export function min(pint a, b) : pint
   }
 }
 
+export
+template<pint W; pint N; pint taps[N]>
+function fib_lfsr (int<W> state) : int<W>
+{
+  int<1> bit;
+  
+  chp {
+    bit := 0;
+    (;i:N: bit := bit ^ state{taps[i]});
+    self := (bit << (W-1)) | (state >> 1)
+  }
+}
+
+
+export namespace bit {
+
+export
+template<pint N, W>
+function repeat(int<W> x) : int<N*W>
+{
+  { N > 0 : "Requires at least one bit in the output" };
+  { W > 0 : "Requires at least one bit in the output" };
+  
+  chp {
+    self := x;
+    (;i: N-1: self := (self << W) | x)
+  }
+}
+
+}
+
 }
