@@ -102,6 +102,19 @@ function repeat(int<W> x) : int<N*W>
   }
 }
 
+export
+template<pint W, W2>
+function sign_extend(int<W> x) : int<W2>
+{
+  { W2 > W : "Sign needs to be extended!" };
+
+  chp {
+    [ x{W-1} = 1 -> self := x | (~int(0,W2-W) << W)
+   [] else -> self := x
+    ]
+  }
+}
+
 }
 
 }

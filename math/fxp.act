@@ -98,11 +98,8 @@ namespace math {
       chp {
 	[ x{A+B-1} = 1 & y{A+B-1} = 0 -> self := true
        [] y{A+B-1} = 1 & x{A+B-1} = 0 -> self := false
-       [] else ->
-	    [ x{A+B-1} = 0 -> self := (x <= y)
-            [] else -> self := (y <= x)
-	    ]
-       ]
+       [] else -> self := (x <= y)
+        ]
       }
     }
 
