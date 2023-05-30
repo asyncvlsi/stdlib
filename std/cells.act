@@ -109,6 +109,9 @@ export defproc CLKBUF3 <: dbuf<4>() { }
 defproc buf (bool? A; bool! Y)
 {
   bool _Y;
+  spec {
+    hazard (_Y)
+  }
   prs {
     A => _Y-
    _Y => Y-
@@ -155,6 +158,9 @@ export defcell NOR3X1 (bool? A, B, C; bool! Y)
 export defcell OR2X1 (bool? A, B; bool! Y)
 {
   bool _Y;
+  spec {
+    hazard (_Y)
+  }
   prs {
      A | B => _Y-
      _Y => Y-
@@ -165,6 +171,9 @@ export defcell OR2X1 (bool? A, B; bool! Y)
 export defcell OR2X2 (bool? A, B; bool! Y)
 {
   bool _Y;
+  spec {
+    hazard (_Y)
+  }
   prs {
      A | B => _Y-
      _Y => Y-
@@ -199,6 +208,9 @@ export defcell NAND3X1 (bool? A, B, C; bool! Y)
 export defcell AND2X1 (bool? A, B; bool! Y) 
 {
   bool _Y;
+  spec {
+    hazard (_Y)
+  }
   prs {  
     A & B => _Y- 
    _Y => Y-
@@ -209,6 +221,9 @@ export defcell AND2X1 (bool? A, B; bool! Y)
 export defcell AND2X2 (bool? A, B; bool! Y) 
 { 
   bool _Y;
+  spec {
+    hazard (_Y)
+  }
   prs {
     A & B => _Y-
    _Y => Y-
@@ -219,6 +234,9 @@ export defcell AND2X2 (bool? A, B; bool! Y)
 export defcell XOR2X1 (bool? A, B; bool! Y)
 {
    bool _A, _B;
+  spec {
+    hazard (_A,_B)
+  }
    prs {
      A => _A-
      B => _B-
@@ -232,6 +250,9 @@ export defcell XOR2X1 (bool? A, B; bool! Y)
 export defcell XNOR2X1 (bool? A, B; bool! Y)
 {
    bool _A, _B;
+  spec {
+    hazard (_A, _B)
+  }
    prs {
      A => _A-
      B => _B-
@@ -246,6 +267,9 @@ export defcell MUX2X1 (bool? A, B, S; bool! Y)
 {
    // Y = !( S ? A : B )
    bool _S;
+   spec {
+     hazard (_S)
+   }
    prs {
      S => _S-
 
@@ -291,6 +315,9 @@ export defcell AOI22X1 (bool? A, B, C, D; bool! Y)
 export defcell MAJ3X1 (bool? A, B, C; bool! Y)
 {
   bool _Y;
+  spec {
+    hazard (_Y)
+  }
   prs {
     A & B | (A|B) & C -> _Y-
    ~A & ~B | (~A | ~B) & ~C -> _Y+
@@ -305,6 +332,9 @@ export defcell MAJ3X1 (bool? A, B, C; bool! Y)
 export defcell HAX1 (bool? A, B; bool! YC, YS)
 {
   bool _YC, _YS;
+  spec {
+    hazard (_YC, _YS)
+  }
   prs {
      A & B => _YC-
     _YC  => YC-
@@ -318,6 +348,9 @@ export defcell HAX1 (bool? A, B; bool! YC, YS)
 export defcell FAX1 (bool? A, B, C; bool! YC, YS)
 {
   bool _YC, _YS;
+  spec {
+    hazard (_YC, _YS)
+  }
   prs {
     (A|B) & C | A&B => _YC-
     _YC => YC-
@@ -361,6 +394,9 @@ export defcell TBUF2 (bool? A, EN; bool! Y)
 export defcell LATCH (bool? CLK, D; bool! Q)
 {
   bool _q, _clk;
+  spec {
+    hazard(_q)
+  }
   prs {
     CLK => _clk-
 
@@ -397,6 +433,9 @@ export defcell LATCHINV (bool? CLK, D, q; bool! _q)
 export defproc LATCHLO (bool? R, CLK, D; bool! Q)
 {
   bool _q;
+  spec {
+    hazard(_q)
+  }
   LATCHINV l(CLK,D,Q,_q);
   NOR2X2 nx(_q,R,Q);
 }
@@ -404,6 +443,9 @@ export defproc LATCHLO (bool? R, CLK, D; bool! Q)
 export defproc LATCHHI (bool? S, CLK, D; bool! Q)
 {
   bool _s, _q;
+  spec {
+    hazard(_q, _s)
+  }
   LATCHINV l(CLK,D,Q,_q);
   INVX1 ix(S,_s);
   NAND2X2 nx(_q,_s,Q);
