@@ -73,19 +73,6 @@ export function min(pint a, b) : pint
   }
 }
 
-export
-template<pint W; pint N; pint taps[N]>
-function fib_lfsr (int<W> state) : int<W>
-{
-  int<1> bit;
-  
-  chp {
-    bit := 0;
-    (;i:N: bit := bit ^ state{taps[i]});
-    self := (bit << (W-1)) | (state >> 1)
-  }
-}
-
 
 export namespace bit {
 
@@ -115,6 +102,57 @@ function sign_extend(int<W> x) : int<W2>
   }
 }
 
+export
+template<pint W>
+function rol(int<W> x) : int<W>
+{
+  chp {
+    self := (x << 1) | (x{W-1})
+  }
 }
+
+export
+template<pint W>
+function ror(int<W> x) : int<W>
+{
+  chp {
+   self := (x >> 1) | (x{0} << (W-1))
+  }
+}
+
+}
+
+
+export
+template<pint W; pint N; pint taps[N]>
+function fib_lfsr (int<W> state) : int<W>
+{
+  int<1> bit;
+
+  { (&i:N: 0 <= taps[i] & taps[i] < W) : "Invalid tap specification" };
+  
+  chp {
+    bit := 0;
+    (;i:N: bit := bit ^ state{taps[i]});
+    self := (bit << (W-1)) | (state >> 1)
+  }
+}
+
+export
+template<pint W; pint N; pint taps[N]>
+function galois_lfsr (int<W> state) : int<W>
+{
+  int<1> bit;
+  
+  { (&i:N: 0 <= taps[i] & taps[i] < W-1) : "Invalid tap specification" };
+    
+  chp {
+    bit := state{0};
+    self := (state >> 1) | (bit << (W-1));
+    (;i:N: self := self & ~int(1 << taps[i], W) |  
+               (state{(taps[i]+1)%W} ^ bit) << taps[i])
+  }
+}
+
 
 }
