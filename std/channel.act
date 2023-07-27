@@ -803,6 +803,62 @@ defchan gen_Mbd <: chan(int<M>) (bool?! d[M]; bool?! r; bool!? a)
 export defchan bd <: gen_Mbd<false,0> () { }
 export defchan rbd <: gen_Mbd<true,0> () { }
 
+export defchan bdbool <: chan(bool) (bool?! d; bool?! r; bool!? a)
+{
+  spec {
+    /* timing fork */
+    timing a- : d* < r*+
+  }
+  
+  methods {
+    /*-- initialize channel, sender end --*/
+    send_init {
+      d-;r-
+    }
+
+    /*-- set output data --*/
+    set {
+      [self -> d+ [] ~self -> d- ]; r+
+    }
+
+    /*-- finish synchronization --*/
+    send_up {
+      [a]
+    }
+
+    /*-- reset part of the protocol --*/
+    send_rest {
+      r-;[~a]
+    }
+
+    /*-- initialize channel, receiver end --*/
+    recv_init {
+      a-
+    }
+
+    /*-- get value --*/
+    get {
+      [r];
+      self := d
+    }
+
+    /*-- finish synchronization action --*/
+    recv_up {
+      a+
+    }
+
+    /*-- reset part of the protocol --*/
+    recv_rest {
+      [~r];a-
+    }
+
+    /*-- probe expression on receiver --*/
+    recv_probe = r;
+
+    // no sender probe
+  }
+}
+
 
 template<pbool reset; pint V; pint M>
 defchan gen_pMbd <: chan(int<M>) (bool?! d[M]; bool!? r; bool?! a)
@@ -943,6 +999,64 @@ defchan gen_ts_Mbd <: chan(int<M>) (bool?! d[M]; bool?! r; bool!? a)
 export defchan ts_bd <: gen_ts_Mbd<false,0> () { }
 export defchan ts_rbd <: gen_ts_Mbd<true,0> () { }
 
+export
+defchan ts_bdbool <: chan(bool) (bool?! d; bool?! r; bool!? a)
+{
+  spec {
+    /* timing fork */
+    timing a- : d* < r*+
+    timing a+ : d* < r*-
+  }
+  
+  methods {
+    /*-- initialize channel, sender end --*/
+    send_init {
+      d-;r-
+    }
+
+    /*-- set output data --*/
+    set {
+      [self -> d+ [] ~self -> d-];
+      [r->r- [] ~r -> r+]
+    }
+
+    /*-- finish synchronization --*/
+    send_up {
+      [a&r|~a&~r]
+    }
+
+    /*-- reset part of the protocol --*/
+    send_rest {
+      skip
+    }
+
+    /*-- initialize channel, receiver end --*/
+    recv_init {
+      a-
+    }
+
+    /*-- get value --*/
+    get {
+      [r&~a|~r&a];
+      self := d
+    }
+
+    /*-- finish synchronization action --*/
+    recv_up {
+      [a->a-[]~a->a+]
+    }
+
+    /*-- reset part of the protocol --*/
+    recv_rest {
+      skip
+    }
+
+    /*-- probe expression on receiver --*/
+    recv_probe = r&~a|~r&a;
+
+    // no sender probe
+  }
+}
 
 
 /*------------------------------------------------------------------------
