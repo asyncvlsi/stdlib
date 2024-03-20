@@ -330,6 +330,41 @@ defproc sigbuf_gen (bool in; bool out[N])
 export defproc sigbuf <: sigbuf_gen<0> () { }
 export defproc sigbufa <: sigbuf_gen<1> () { }
 
+defcell xor2 (bool? in[2]; bool! out)
+{
+   bool _in0, _in1;
+   prs {
+     in[0] => _in0-
+     in[1] => _in1-
+
+    [keeper=2] ~in[1] & ~_in0 | ~_in1 & ~in[0] -> out+
+     _in1 & _in0 | in[1] & in[0] -> out-
+   }
+   sizing { _in0{-1}; _in1{-1}; out{-1} }
+}
+
+/*
+ * Build an XOR-gate tree with optional inversion of final output
+ */
+template <pint N; pbool invert> 
+defproc xortree (bool? in[N]; bool out)
+{
+    { N > 0 : "Need positive no. of inputs to gate" };
+
+    [ N=1 -> in[0] = out; 
+    []N=2 -> xor2 x(in,out);
+    []N>2 -> bool outx[2]; 
+            [ N%2=0 ->  xortree <N/2>       x0(in[0..(N/2)-1],outx[0]);
+                        xortree <N/2>       x1(in[(N/2)..N-1],outx[1]);
+                        xor2 x(outx, out);
+            []N%2=1 ->  xortree <N/2>       x0(in[0..(N/2)-1],outx[0]);
+                        xortree <(N/2)+1>   x1(in[(N/2)..N-1],outx[1]);
+                        xor2 x(outx, out);
+            ]
+    ]
+}
+
+
 }
 
 }
