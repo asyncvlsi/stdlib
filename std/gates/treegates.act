@@ -343,23 +343,33 @@ defcell xor2 (bool? in[2]; bool! out)
    sizing { _in0{-1}; _in1{-1}; out{-1} }
 }
 
-/*
- * Build an XOR-gate tree with optional inversion of final output
- */
-template <pint N; pbool invert> 
-defproc xortree (bool? in[N]; bool out)
+template <pint N> 
+defproc xortree_t (bool? in[N]; bool out)
 {
     { N > 0 : "Need positive no. of inputs to gate" };
 
     [ N=1 -> in[0] = out; 
     []N=2 -> xor2 x(in,out);
     []N>2 -> bool outx[2]; 
-             xortree <N/2>     x0(in[0..(N/2)-1],outx[0]);
-             xortree <N-(N/2)> x1(in[(N/2)..N-1],outx[1]);
+             xortree_t <N/2>     x0(in[0..(N/2)-1],outx[0]);
+             xortree_t <N-(N/2)> x1(in[(N/2)..N-1],outx[1]);
              xor2 x(outx, out);
     ]
 }
 
+/*
+ * Build an XOR-gate tree with optional inversion of final output
+ */
+export template <pint N; pbool invert>
+defproc xortree (bool? in[N]; bool out)
+{
+  bool tmp;
+  xortree_t <N> x(in,tmp);
+
+  [invert -> prs { tmp => out- } 
+  [] else -> tmp = out;
+  ]
+}
 
 }
 
