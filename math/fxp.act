@@ -175,4 +175,94 @@ namespace math {
     }
 
   }
+
+  export
+  template <pint A, B>
+  deftype fixpoint(int<A+B> x)
+  {
+    methods {
+      function plus(fixpoint<A,B> rhs) : fixpoint<A,B>
+      {
+	chp {
+	  self.x := fxp::add<A,B>(x,rhs.x)
+	}
+      }
+      function minus(fixpoint<A,B> rhs) : fixpoint<A,B>
+      {
+	chp {
+	   self.x := fxp::sub<A,B>(x,rhs.x)
+	}
+      }
+      function mult(fixpoint<A,B> rhs) : fixpoint<A,B>
+      {
+	chp {
+	  self.x := fxp::mults<A,B>(x,rhs.x)
+	}
+      }
+      function div(fixpoint<A,B> rhs) : fixpoint<A,B>
+      {
+	chp {
+	  self.x := fxp::divs<A,B>(x,rhs.x)
+	}
+      }
+      function uminus() : fixpoint<A,B>
+      {
+	chp {
+	  self.x := fxp::uminus<A,B>(x)
+	}
+      }
+      function le(fixpoint<A,B> rhs) : bool
+      {
+	chp {
+	  self := fxp::le<A,B>(x, rhs.x)
+	}
+      }
+      function lt(fixpoint<A,B> rhs) : bool
+      {
+	chp {
+	  self := (x != rhs.x) & fxp::le<A,B>(x, rhs.x)
+	}
+      }
+      function ne(fixpoint<A,B> rhs) : bool
+      {
+	chp {
+	  self := (x != rhs.x)
+	}
+      }
+      function ge(fixpoint<A,B> rhs) : bool
+      {
+	chp {
+	  self := fxp::le<A,B>(rhs.x, x)
+	}
+      }
+      function gt(fixpoint<A,B> rhs) : bool
+      {
+	chp {
+	  self := (x != rhs.x) & fxp::le<A,B>(rhs.x, x)
+	}
+      }
+
+      macro set(int<A+B> v)
+      {
+        x := v
+      }
+
+      function const(preal v) : pint
+      {
+	chp {
+	  self := fxp::conv_to_fxp(A,B,v)
+	}
+      }
+
+      macro log()
+      {
+	log_st("");
+	[ x{A+B-1} = 1 -> log_p("-", int(~x+1,A+B)>>B)
+	[] else -> log_p("+", x >> B)
+	];
+	log_p (".{", (x{A+B-1} = 1 ? int(~x+1,A+B) : x) & int((1 << B)-1,B), "/", (1 << B), "}");
+	log_nl("")
+      }
+    }
+  }
 }
