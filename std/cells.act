@@ -99,9 +99,9 @@ defproc dbuf (bool? in; bool! out)
   }
 }
 
-export defproc CLKBUF1 <: dbuf<2>() { }
-export defproc CLKBUF2 <: dbuf<3>() { }
-export defproc CLKBUF3 <: dbuf<4>() { }
+export defcell CLKBUF1 <: dbuf<2>() { }
+export defcell CLKBUF2 <: dbuf<3>() { }
+export defcell CLKBUF3 <: dbuf<4>() { }
 
 
 /*--  signal buffers --*/
