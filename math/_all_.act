@@ -21,3 +21,4 @@
 
 import "math/fxp.act";
 import "math/misc.act";
+import "math/sint.act";
