@@ -272,6 +272,13 @@ namespace math {
         x := v
       }
 
+      function get() : int<A+B>
+      {
+        chp {
+          self := x
+        }
+      }
+
       function positive() : bool
       {
         chp {
