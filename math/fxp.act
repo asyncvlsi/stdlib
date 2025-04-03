@@ -71,6 +71,7 @@
  *        le<A,B>(x,y) : returns true if x <= y
  *   positive<A,B>(x)  : returns true if x > 0
  *   negative<A,B>(x)  : returns true if x < 0
+ *       zero<A,B>(x)  : returns true if x = 0
  *------------------------------------------------------------------------
  */
 
@@ -103,6 +104,15 @@ namespace math {
     {
       chp {
         self := (x{A+B-1} = 1)
+      }
+    }
+
+    export
+    template<pint A,B>
+    function zero(int<A+B> x) : bool
+    {
+      chp {
+        self := (x = 0)
       }
     }
 
@@ -260,6 +270,26 @@ namespace math {
       macro set(int<A+B> v)
       {
         x := v
+      }
+
+      function positive() : bool
+      {
+        chp {
+          self := fxp::positive<A, B>(x)
+        }
+      }
+
+      function negative() : bool
+      {
+        chp {
+          self := fxp::negative<A, B>(x)
+        }
+      }
+
+      function zero() : bool {
+        chp {
+          self := fxp::zero<A, B>(x)
+        }
       }
 
       function const(preal v) : pint
