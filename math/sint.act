@@ -45,22 +45,7 @@ import math::fxp;
 namespace math {
     export
     template<pint W>
-    deftype sint <: fixpoint<W,0> ()
-    {
-        methods {
-            function positive() : bool {
-                chp {
-                    self := fxp::positive<W,0>(x)
-                }
-            }
-
-            function bits() : int<W> {
-                chp {
-                    self := x
-                }
-            }
-        }
-    }
+    deftype sint <: fixpoint<W,0> () {}
 
     export
     namespace sint_ops {
