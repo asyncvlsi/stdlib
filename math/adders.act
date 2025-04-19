@@ -2,7 +2,7 @@
  *
  *  This file is part of ACT standard library
  *
- *  Copyright (c) 2022 Rajit Manohar
+ *  Copyright (c) 2025 Jakob Jordan
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -19,7 +19,23 @@
  **************************************************************************
  */
 
-import "math/adders.act";
-import "math/fxp.act";
-import "math/misc.act";
-import "math/sint.act";
+namespace math {
+
+export
+template<pint N>
+defproc carry_save_adder(chan?(int<N>) a_in, b_in, c_in; chan!(int<N>) s_out, d_out) {
+    int<N> a, b, c;
+    int<1> s[N], d[N];
+    int<N> st, dt;
+
+    chp {
+        *[ a_in?a, b_in?b, c_in?c;
+           (, i : N : s[i] := (a{i} ^ b{i} ^ c{i}), d[i] := (a{i} & b{i} | ((a{i} ^ b{i}) & c{i})));
+           st := (| i : N : s[i] << i),
+           dt := (| i : N : d[i] << i);
+           s_out!st, d_out!(dt << 1)
+         ]
+    }
+}
+
+}
