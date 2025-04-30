@@ -15,7 +15,7 @@
 #  limitations under the License.
 #  
 #-------------------------------------------------------------------------
-TARGETACT=_all_.act fxp.act misc.act sint.act
+TARGETACT=_all_.act adders.act fxp.act misc.act sint.act
 TARGETACTSUBDIR=math
 
 include $(ACT_HOME)/scripts/Makefile.std
