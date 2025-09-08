@@ -120,6 +120,20 @@ function ror(int<W> x) : int<W>
   }
 }
 
+/**
+ * WARNING: This only works if x is non-zero.
+ * The function returns the bit-position of the leading one in "x"
+ */
+export
+template<pint W>
+function find_msb_pos(int<W> x) : int<std::ceil_log2(W)>
+{
+  chp {
+    self := 0;
+    (; i : W : [ x{i} = 1 -> self := i [] else -> skip ])
+  }
+}
+
 }
 
 

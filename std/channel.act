@@ -860,6 +860,83 @@ export defchan bdbool <: chan(bool) (bool?! d; bool?! r; bool!? a)
 }
 
 
+
+/*
+ * Bundled-data channel for standard memory interface
+ *   Encoding: bottom two bits are control
+ *             0 = write, 1 = read, 2 = read-modify-write
+ */
+export 
+template<pint M>
+defchan bd_memaddr <: chan(int<M+2>) (bool?! d[M]; bool?! r, w, rw; bool!? a)
+{
+  spec {
+    /* timing forks */
+    timing a- : d* < r*+
+    timing a- : d* < rw*+
+    timing a- : d* < w*+
+  }
+  
+  methods {
+    /*-- initialize channel, sender end --*/
+    send_init {
+      (,i:M: d[i]-),r-,w-,rw-
+    }
+
+    /*-- set output data --*/
+    set {
+      (,i:M: [((self >> (i+2)) & 1) = 0 -> d[i]- [] else -> d[i]+ ]);
+      [self{1..0} = 0 -> w+
+      []self{1..0} = 1 -> r+
+      []self{1..0} = 2 -> rw+
+      ]
+    }
+
+    /*-- finish synchronization --*/
+    send_up {
+      [a]
+    }
+
+    /*-- reset part of the protocol --*/
+    send_rest {
+      r-,w-,rw-;[~a]
+    }
+
+    /*-- initialize channel, receiver end --*/
+    recv_init {
+      a-
+    }
+
+    /*-- get value --*/
+    get {
+      [r|w|rw];
+      self := 0;
+      (;i:M: self := self | (int(d[i]) << (i+2)));
+      [r ->  self := self | 1
+      []rw -> self := self | 2
+      [] else -> skip
+      ]  
+    }
+
+    /*-- finish synchronization action --*/
+    recv_up {
+      a+
+    }
+
+    /*-- reset part of the protocol --*/
+    recv_rest {
+      [~r&~w&~rw];a-
+    }
+
+    /*-- probe expression on receiver --*/
+    recv_probe = (r|w|rw);
+
+    // no sender probe
+  }
+}
+
+
+
 template<pbool reset; pint V; pint M>
 defchan gen_pMbd <: chan(int<M>) (bool?! d[M]; bool!? r; bool?! a)
 {
