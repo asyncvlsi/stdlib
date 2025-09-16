@@ -134,8 +134,16 @@ function find_msb_pos(int<W> x) : int<std::ceil_log2(W)>
   }
 }
 
+export
+template<pint W>
+function popcount(int<W> x) : int<std::ceil_log2(W+1)>
+{
+  chp {
+   self := (+ i : W : x{i})
+  }
 }
 
+}
 
 export
 template<pint W; pint N; pint taps[N]>
