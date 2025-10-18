@@ -397,7 +397,7 @@ export defcell LATCH (bool? CLK, D; bool! Q)
   spec {
     hazard(_q)
   }
-  prs {
+  prs * {
     CLK => _clk-
 
    [keeper=0] D<10> & CLK -> _q-
@@ -415,7 +415,7 @@ export defcell LATCH (bool? CLK, D; bool! Q)
 export defcell LATCHINV (bool? CLK, D, q; bool! _q)
 {
   bool _clk;
-  prs {
+  prs * {
     CLK => _clk-
 
    [keeper=0] D<10> & CLK -> _q-
