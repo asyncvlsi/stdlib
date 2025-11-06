@@ -233,34 +233,28 @@ export defcell AND2X2 (bool? A, B; bool! Y)
 
 export defcell XOR2X1 (bool? A, B; bool! Y)
 {
-   bool _A, _B;
+     bool C;
   spec {
-    hazard (_A,_B)
+    hazard (C)
   }
    prs {
-     A => _A-
-     B => _B-
-
-    [keeper=2] ~B & ~_A | ~_B & ~A -> Y+
-     _B & _A | B & A -> Y-
+     A | B  => C-
+     C | (A & B)=> Y-
    }
-   sizing { _A{-1}; _B{-1}; Y{-1} }
+   sizing { C{-1}; Y{-1} }
 }
 
 export defcell XNOR2X1 (bool? A, B; bool! Y)
 {
-   bool _A, _B;
+  bool C;
   spec {
-    hazard (_A, _B)
+    hazard (C)
   }
    prs {
-     A => _A-
-     B => _B-
-
-    [keeper=2] ~B & ~A | ~_B & ~_A -> Y+
-     B & _A | _B & A -> Y-
+     A & B       => C-
+     (A | B) & C => Y-
    }
-   sizing { _A{-1}; _B{-1}; Y{-1} }
+   sizing { C{-1}; Y{-1} }
 }
 
 export defcell MUX2X1 (bool? A, B, S; bool! Y)
