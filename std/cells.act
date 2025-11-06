@@ -24,9 +24,9 @@
  *  A technology-independent cell library for combinational gates.
  *  Useful for generating the datapath for latch-based bundled-data logic.
  *
- *  Where possible, we have used the same names and similar sizing
- *  information as James Stine's open-source SPICE library for a 180nm 
- *  process.
+ *  The initial version of the cell library used the same names and similar
+ *  sizing information as James Stine's open-source SPICE library for a
+ *  180nm process.
  *
  *------------------------------------------------------------------------
  */
