@@ -886,9 +886,9 @@ defchan bd_memaddr <: chan(int<M+2>) (bool?! d[M]; bool?! r, w, rw; bool!? a)
     /*-- set output data --*/
     set {
       (,i:M: [((self >> (i+2)) & 1) = 0 -> d[i]- [] else -> d[i]+ ]);
-      [self{1..0} = 0 -> w+
-      []self{1..0} = 1 -> r+
-      []self{1..0} = 2 -> rw+
+      [(self & 0x3) = 0 -> w+
+      [](self & 0x3) = 1 -> r+
+      [](self & 0x3) = 2 -> rw+
       ]
     }
 
