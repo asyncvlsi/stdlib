@@ -146,15 +146,30 @@ namespace math {
       }
     }
 
+    template<pint N>
+    function round(int<1> lsb; int<N> off) : int<1> {
+      chp {
+                                   // trunc
+        [ FXP_ROUNDING_MODE = 0 -> self := 0
+       [] FXP_ROUNDING_MODE = 1 -> // half to even
+            self := (off{N-1} = 0) | (off = int(1 << (N - 1), N) & lsb = 0) ? 0 : 1
+       [] else -> assert(0)
+        ]
+      }
+    }
+
     export
     template<pint A,B>
     function mults (int<A+B> x, y) : int<A+B>
     {
       bool sx, sy;
+      int<2 * A + 2 * B> r;
+
       chp {
         [ x{A+B-1} = 1 -> sx+; x := ~x + 1 [] else -> sx- ];
         [ y{A+B-1} = 1 -> sy+; y := ~y + 1 [] else -> sy- ];
-        self := (x * y) >> B;
+        r := (x * y);
+        self := (r >> B) + round<B>(r{B}, r{B-1..0});
         [ sx != sy -> self := ~self + 1 [] else -> skip ]
       }
     }
@@ -198,7 +213,6 @@ namespace math {
         self := ~x + 1
       }
     }
-
   }
 
   export
@@ -325,6 +339,35 @@ namespace math {
       }
   }
   }
+
+  export namespace fxp {
+    export
+    template<pint A_FROM,B_FROM,A_TO,B_TO>
+    function sdowncast(fixpoint<A_FROM,B_FROM> a) : fixpoint<A_TO,B_TO> {
+      {A_FROM > A_TO};
+      {B_FROM > B_TO};
+
+      int<1> rnd;
+
+      chp {
+        rnd := round<B_FROM - B_TO>(a.x{B_FROM - B_TO}, a.x{B_FROM - B_TO - 1..0});
+        self.x := {a.x{(A_TO + B_FROM - 1)..B_FROM}, a.x{B_FROM-1..(B_FROM - B_TO)}} + rnd
+      }
+    }
+
+    export
+    template<pint A_FROM,B_FROM,A_TO,B_TO>
+    function supcast(fixpoint<A_FROM,B_FROM> a) : fixpoint<A_TO,B_TO> {
+      {A_FROM < A_TO};
+      {B_FROM < B_TO};
+
+      chp {
+         self.x := a.x{(A_FROM + B_FROM - 1)..B_FROM} << B_TO | a.x{(B_FROM - 1)..0} << (B_TO - B_FROM);
+         [ a.x{A_FROM + B_FROM - 1} = 0 -> skip
+                   // sign extend
+        [] else -> self.x := self.x | (~int(0, A_TO - A_FROM) << (A_FROM + B_TO))
+         ]
+      }
     }
   }
 }
