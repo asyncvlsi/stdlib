@@ -216,7 +216,7 @@ namespace math {
   } // namespace `fxp`
 
   export
-  template <pint A,B,ROUNDING_MODE>
+  template <pint A,B,ROUNDING_MODE=0>
   deftype fixpoint(int<A+B> x)
   {
     methods {
