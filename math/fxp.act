@@ -146,12 +146,12 @@ namespace math {
       }
     }
 
-    template<pint N>
+    template<pint N,ROUNDING_MODE>
     function round(int<1> lsb; int<N> off) : int<1> {
       chp {
-                                   // trunc
-        [ FXP_ROUNDING_MODE = 0 -> self := 0
-       [] FXP_ROUNDING_MODE = 1 -> // half to even
+                               // trunc
+        [ ROUNDING_MODE = 0 -> self := 0
+       [] ROUNDING_MODE = 1 -> // half to even
             self := (off{N-1} = 0) | (off = int(1 << (N - 1), N) & lsb = 0) ? 0 : 1
        [] else -> assert(0)
         ]
@@ -159,7 +159,7 @@ namespace math {
     }
 
     export
-    template<pint A,B>
+    template<pint A,B,ROUNDING_MODE>
     function mults (int<A+B> x, y) : int<A+B>
     {
       bool sx, sy;
@@ -169,7 +169,7 @@ namespace math {
         [ x{A+B-1} = 1 -> sx+; x := ~x + 1 [] else -> sx- ];
         [ y{A+B-1} = 1 -> sy+; y := ~y + 1 [] else -> sy- ];
         r := (x * y);
-        self := (r >> B) + round<B>(r{B}, r{B-1..0});
+        self := (r >> B) + round<B,ROUNDING_MODE>(r{B}, r{B-1..0});
         [ sx != sy -> self := ~self + 1 [] else -> skip ]
       }
     }
@@ -213,68 +213,68 @@ namespace math {
         self := ~x + 1
       }
     }
-  }
+  } // namespace `fxp`
 
   export
-  template <pint A,B>
+  template <pint A,B,ROUNDING_MODE>
   deftype fixpoint(int<A+B> x)
   {
     methods {
-      function plus(fixpoint<A,B> rhs) : fixpoint<A,B>
+      function plus(fixpoint<A,B,ROUNDING_MODE> rhs) : fixpoint<A,B,ROUNDING_MODE>
       {
         chp {
           self.x := fxp::add<A,B>(x,rhs.x)
         }
       }
-      function minus(fixpoint<A,B> rhs) : fixpoint<A,B>
+      function minus(fixpoint<A,B,ROUNDING_MODE> rhs) : fixpoint<A,B,ROUNDING_MODE>
       {
         chp {
            self.x := fxp::sub<A,B>(x,rhs.x)
         }
       }
-      function mult(fixpoint<A,B> rhs) : fixpoint<A,B>
+      function mult(fixpoint<A,B,ROUNDING_MODE> rhs) : fixpoint<A,B,ROUNDING_MODE>
       {
         chp {
-          self.x := fxp::mults<A,B>(x,rhs.x)
+          self.x := fxp::mults<A,B,ROUNDING_MODE>(x,rhs.x)
         }
       }
-      function div(fixpoint<A,B> rhs) : fixpoint<A,B>
+      function div(fixpoint<A,B,ROUNDING_MODE> rhs) : fixpoint<A,B,ROUNDING_MODE>
       {
         chp {
           self.x := fxp::divs<A,B>(x,rhs.x)
         }
       }
-      function uminus() : fixpoint<A,B>
+      function uminus() : fixpoint<A,B,ROUNDING_MODE>
       {
         chp {
           self.x := fxp::uminus<A,B>(x)
         }
       }
-      function le(fixpoint<A,B> rhs) : bool
+      function le(fixpoint<A,B,ROUNDING_MODE> rhs) : bool
       {
         chp {
           self := fxp::le<A,B>(x, rhs.x)
         }
       }
-      function lt(fixpoint<A,B> rhs) : bool
+      function lt(fixpoint<A,B,ROUNDING_MODE> rhs) : bool
       {
         chp {
           self := (x != rhs.x) & fxp::le<A,B>(x, rhs.x)
         }
       }
-      function ne(fixpoint<A,B> rhs) : bool
+      function ne(fixpoint<A,B,ROUNDING_MODE> rhs) : bool
       {
         chp {
           self := (x != rhs.x)
         }
       }
-      function ge(fixpoint<A,B> rhs) : bool
+      function ge(fixpoint<A,B,ROUNDING_MODE> rhs) : bool
       {
         chp {
           self := fxp::le<A,B>(rhs.x, x)
         }
       }
-      function gt(fixpoint<A,B> rhs) : bool
+      function gt(fixpoint<A,B,ROUNDING_MODE> rhs) : bool
       {
         chp {
           self := (x != rhs.x) & fxp::le<A,B>(rhs.x, x)
@@ -337,27 +337,27 @@ namespace math {
         ];
         log_p (".{", (x{A+B-1} = 1 ? int(~x+1, A+B) : x) & int((1 << B)-1, B), "/", (1 << B), "}")
       }
-  }
+    }
   }
 
   export namespace fxp {
     export
-    template<pint A_FROM,B_FROM,A_TO,B_TO>
-    function sdowncast(fixpoint<A_FROM,B_FROM> a) : fixpoint<A_TO,B_TO> {
+    template<pint A_FROM,B_FROM,A_TO,B_TO,ROUNDING_MODE>
+    function sdowncast(fixpoint<A_FROM,B_FROM,ROUNDING_MODE> a) : fixpoint<A_TO,B_TO,ROUNDING_MODE> {
       {A_FROM > A_TO};
       {B_FROM > B_TO};
 
       int<1> rnd;
 
       chp {
-        rnd := round<B_FROM - B_TO>(a.x{B_FROM - B_TO}, a.x{B_FROM - B_TO - 1..0});
+        rnd := round<B_FROM - B_TO,ROUNDING_MODE>(a.x{B_FROM - B_TO}, a.x{B_FROM - B_TO - 1..0});
         self.x := {a.x{(A_TO + B_FROM - 1)..B_FROM}, a.x{B_FROM-1..(B_FROM - B_TO)}} + rnd
       }
     }
 
     export
-    template<pint A_FROM,B_FROM,A_TO,B_TO>
-    function supcast(fixpoint<A_FROM,B_FROM> a) : fixpoint<A_TO,B_TO> {
+    template<pint A_FROM,B_FROM,A_TO,B_TO,ROUNDING_MODE>
+    function supcast(fixpoint<A_FROM,B_FROM,ROUNDING_MODE> a) : fixpoint<A_TO,B_TO,ROUNDING_MODE> {
       {A_FROM < A_TO};
       {B_FROM < B_TO};
 
@@ -369,5 +369,5 @@ namespace math {
          ]
       }
     }
-  }
-}
+  } // namespace `fxp`
+} // namespace `math`
