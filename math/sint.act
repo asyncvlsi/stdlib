@@ -45,7 +45,7 @@ import math::fxp;
 namespace math {
     export
     template<pint W>
-    deftype sint <: fixpoint<W,0> () {}
+    deftype sint <: fixpoint<W,0,0> () {}
 
     export
     namespace sint_ops {
