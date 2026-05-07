@@ -43,7 +43,7 @@ export defcell TIELOX1 (bool! Y)
   spec {
     rand_init (x)
   }
-  prs {
+  prs * {
     [keeper=2] x -> Y-
     [keeper=2] ~x -> x+
   }
@@ -55,7 +55,7 @@ export defcell TIEHIX1 (bool! Y)
   spec {
     rand_init (x)
   }
-  prs {
+  prs * {
     [keeper=2] ~x -> Y+
     [keeper=2] x -> x-
   }
@@ -65,7 +65,7 @@ export defcell TIEHIX1 (bool! Y)
 
 defproc inv (bool? A; bool! Y)
 {
-  prs {
+  prs * {
     A => Y-
   }
 }
@@ -92,7 +92,7 @@ defproc dbuf (bool? in; bool! out)
   bool sig[2*N+1];
   sig[0] = in;
   sig[2*N] = out;
-  prs {
+  prs * {
     (i:2*N: ~sig[i] <80;2> -> sig[i+1]+
              sig[i] <40;2> -> sig[i+1]-
      )
@@ -112,7 +112,7 @@ defproc buf (bool? A; bool! Y)
   spec {
     hazard (_Y)
   }
-  prs {
+  prs * {
     A => _Y-
    _Y => Y-
   }
@@ -133,7 +133,7 @@ export defcell BUFX4 <: buf()
   
 export defcell NOR2X1 (bool? A, B; bool! Y)
 {
-  prs {
+  prs * {
      A | B => Y-
   }
   sizing { Y {-1} }
@@ -141,7 +141,7 @@ export defcell NOR2X1 (bool? A, B; bool! Y)
   
 export defcell NOR2X2 (bool? A, B; bool! Y)
 {
-  prs {
+  prs * {
      A | B => Y-
   }
   sizing { Y {-2} }
@@ -149,7 +149,7 @@ export defcell NOR2X2 (bool? A, B; bool! Y)
   
 export defcell NOR3X1 (bool? A, B, C; bool! Y)
 {
-  prs {
+  prs * {
     A | B | C => Y-
   }
   sizing { Y {-1} }
@@ -161,7 +161,7 @@ export defcell OR2X1 (bool? A, B; bool! Y)
   spec {
     hazard (_Y)
   }
-  prs {
+  prs * {
      A | B => _Y-
      _Y => Y-
   }
@@ -174,7 +174,7 @@ export defcell OR2X2 (bool? A, B; bool! Y)
   spec {
     hazard (_Y)
   }
-  prs {
+  prs * {
      A | B => _Y-
      _Y => Y-
   }
@@ -183,7 +183,7 @@ export defcell OR2X2 (bool? A, B; bool! Y)
 
 export defcell NAND2X1 (bool? A, B; bool! Y)
 {
-  prs {  
+  prs * {  
     A & B => Y-
   }
   sizing { Y{-1} }
@@ -191,7 +191,7 @@ export defcell NAND2X1 (bool? A, B; bool! Y)
   
 export defcell NAND2X2 (bool? A, B; bool! Y)
 {
-  prs {  
+  prs * {  
     A & B => Y-
   }
   sizing { Y{-2} }
@@ -199,7 +199,7 @@ export defcell NAND2X2 (bool? A, B; bool! Y)
   
 export defcell NAND3X1 (bool? A, B, C; bool! Y)
 {
-  prs {  
+  prs * {  
     A & B & C => Y-
   }
   sizing { Y{-1} }
@@ -211,7 +211,7 @@ export defcell AND2X1 (bool? A, B; bool! Y)
   spec {
     hazard (_Y)
   }
-  prs {  
+  prs * {  
     A & B => _Y- 
    _Y => Y-
   }
@@ -224,7 +224,7 @@ export defcell AND2X2 (bool? A, B; bool! Y)
   spec {
     hazard (_Y)
   }
-  prs {
+  prs * {
     A & B => _Y-
    _Y => Y-
   }
@@ -237,7 +237,7 @@ export defcell XOR2X1 (bool? A, B; bool! Y)
   spec {
     hazard (C)
   }
-   prs {
+   prs * {
      A | B  => C-
      C | (A & B)=> Y-
    }
@@ -250,7 +250,7 @@ export defcell XNOR2X1 (bool? A, B; bool! Y)
   spec {
     hazard (C)
   }
-   prs {
+   prs * {
      A & B       => C-
      (A | B) & C => Y-
    }
@@ -264,7 +264,7 @@ export defcell MUX2X1 (bool? A, B, S; bool! Y)
    spec {
      hazard (_S)
    }
-   prs {
+   prs * {
      S => _S-
 
     [keeper=2] ~A & ~_S | ~B & ~S -> Y+
@@ -275,7 +275,7 @@ export defcell MUX2X1 (bool? A, B, S; bool! Y)
 
 export defcell OAI21X1 (bool? A, B, C; bool! Y)
 {
-  prs {
+  prs * {
     (A | B) & C => Y-  
   }
   sizing { Y{-1} }
@@ -283,7 +283,7 @@ export defcell OAI21X1 (bool? A, B, C; bool! Y)
 
 export defcell AOI21X1 (bool? A, B, C; bool! Y) 
 { 
-  prs {
+  prs * {
     A & B | C => Y-
   }
   sizing { Y{-1} }
@@ -292,7 +292,7 @@ export defcell AOI21X1 (bool? A, B, C; bool! Y)
 export defcell OAI22X1 (bool? A, B, C, D; bool! Y)
 {
   // Y = !((A|B) & (C|D))
-  prs {
+  prs * {
     (A | B) & (C | D) => Y-  
   }
   sizing { Y{-1} }
@@ -300,7 +300,7 @@ export defcell OAI22X1 (bool? A, B, C, D; bool! Y)
 
 export defcell AOI22X1 (bool? A, B, C, D; bool! Y) 
 { 
-  prs {
+  prs * {
     A & B | C & D => Y-
   }
   sizing { Y{-1} }
@@ -312,7 +312,7 @@ export defcell MAJ3X1 (bool? A, B, C; bool! Y)
   spec {
     hazard (_Y)
   }
-  prs {
+  prs * {
     A & B | (A|B) & C -> _Y-
    ~A & ~B | (~A | ~B) & ~C -> _Y+
 
@@ -329,7 +329,7 @@ export defcell HAX1 (bool? A, B; bool! YC, YS)
   spec {
     hazard (_YC, _YS)
   }
-  prs {
+  prs * {
      A & B => _YC-
     _YC  => YC-
 
@@ -345,7 +345,7 @@ export defcell FAX1 (bool? A, B, C; bool! YC, YS)
   spec {
     hazard (_YC, _YS)
   }
-  prs {
+  prs * {
     (A|B) & C | A&B => _YC-
     _YC => YC-
 
@@ -362,7 +362,7 @@ export defcell FAX1 (bool? A, B, C; bool! YC, YS)
 export defcell TBUF1 (bool? A, EN; bool! Y)
 {
   bool _en;
-  prs {
+  prs * {
     EN => _en-
 
    [keeper=0] ~A & ~_en -> Y+
@@ -374,7 +374,7 @@ export defcell TBUF1 (bool? A, EN; bool! Y)
 export defcell TBUF2 (bool? A, EN; bool! Y)
 {
   bool _en;
-  prs {
+  prs * {
     EN => _en-
 
    [keeper=0] ~A & ~_en -> Y+
