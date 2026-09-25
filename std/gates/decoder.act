@@ -33,7 +33,7 @@ export namespace gates {
    [ K < 5 ->
      bool _in[2][K];
      _in[int(inv)][0..K-1] = in;
-     prs * {
+     prs {
        (i: K : in[i] => _in[1-int(inv)][i]-) // inverters
      }
      [inv ->
