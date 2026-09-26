@@ -73,7 +73,6 @@ defproc ortree (bool? in[N]; bool out)
           i = i + 2;
         ]
         sizing {
-          leak_adjust <- 1; 
           p_n_mode <- 1;
           tmp[end+j]{-1}
         }
@@ -95,7 +94,6 @@ defproc ortree (bool? in[N]; bool out)
   ]
   [isinv ->
   sizing {
-    leak_adjust <- 1; 
     p_n_mode <- 1;
     out{-1}
   }
@@ -154,7 +152,6 @@ defproc andtree (bool? in[N]; bool out)
           i = i + 2;
         ]
         sizing {
-          leak_adjust <- 1; 
           p_n_mode <- 1;
           tmp[end+j]{-1}
         }
@@ -176,7 +173,6 @@ defproc andtree (bool? in[N]; bool out)
   ]
   [isinv ->
   sizing {
-    leak_adjust <- 1; 
     p_n_mode <- 1;
     out{-1}
   }
@@ -228,7 +224,6 @@ defproc ctree (bool? in[N]; bool out)
           i = i + 2;
         ]
         sizing {
-          leak_adjust <- 1; 
           p_n_mode <- 1;
           tmp[end+j]{-1}
         }
@@ -248,7 +243,6 @@ defproc ctree (bool? in[N]; bool out)
   [isinv -> 
   sizing {
     p_n_mode <- 1;
-    leak_adjust <- 1; 
     out{-1}
   }
   ]
@@ -273,37 +267,31 @@ defproc sigbuf_gen (bool in; bool out[N])
 	(i:N-1:out[i+1]=out[0];)
 	[ N < 4 ->
 	  sizing {
-	    leak_adjust <- 1;
 	    p_n_mode <- PNRAT;
 	    _out {-1}; out[0] {-2}
 	  }
 	 [] N >= 4 & N < 6 -> 
           sizing {
-            leak_adjust <- 1; 
 	    p_n_mode <- PNRAT;
       	    _out {-1}; out[0] {-4}
          }
 	 [] N = 6 ->
           sizing {
-            leak_adjust <- 1; 
 	    p_n_mode <- PNRAT;
 	    _out {-2}; out[0] {-6,2}
          }
 	 [] N >= 7 & N < 10 ->
           sizing {
-            leak_adjust <- 1; 
 	    p_n_mode <- PNRAT;
       	    _out {-2}; out[0] {-8,2}
          }
 	 [] N >= 10 & N < 14 ->
           sizing {
-            leak_adjust <- 1; 
 	    p_n_mode <- PNRAT;
       	    _out {-3}; out[0] {-12,3}
          }
 	 [] else ->
           sizing {
-            leak_adjust <- 1; 
 	    p_n_mode <- PNRAT;
       	    _out {-4}; out[0] {-16,4}
 	  }

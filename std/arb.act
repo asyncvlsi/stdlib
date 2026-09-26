@@ -59,7 +59,6 @@ export defcell buf_arbiter(bool? a, b; bool! u, v)
     passp<10>(_v,_u,v)
   }
   sizing {
-   leak_adjust <- 1;
    _u{-1};
    _v{-1}
   }
@@ -89,7 +88,6 @@ export defcell ideal_arbiter(bool? a, b; bool! u, v)
     [keeper=0] _v | u => v-
   }
   sizing {
-   leak_adjust <- 1;
    _u{-1}; _v{-1};
    u{-1}; v{-1}
   }
@@ -103,7 +101,6 @@ defproc maybe_execute(channel::e1of1? A; channel::e1of1! S; bool! uA)
    uA & S.e => A.e-
   }
   sizing {
-    leak_adjust <- 1; 
     A.e {-1}
   }
 }
