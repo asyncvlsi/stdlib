@@ -1,0 +1,85 @@
+import std;
+
+defproc test_ram() {
+  pint W = 11;
+  std::ram<7,W> m;
+  int<W> buf, expected;
+
+  chp {
+    log("start");
+    // write
+    expected := 13;
+    m.rd!0, m.addr!3, m.din!expected;
+    
+    // read
+    m.rd!1, m.addr!3, m.dout?buf;
+    assert(buf = expected);
+
+    // read-modify-write
+    m.rd!2, m.addr!3, m.dout?buf;
+    assert(buf = expected);
+    expected := 17;
+    m.din!expected;
+
+    // read
+    m.rd!1, m.addr!3, m.dout?buf;
+    assert(buf = expected);
+    log("done")
+  }
+}
+
+defproc test_dualram() {
+  pint W = 11;
+  std::dualram<7,W> m;
+  int<W> buf, expected;
+
+  chp {
+    log("start");
+    // write
+    expected := 13;
+    m.rd[0]!0, m.addr[0]!3, m.din[0]!expected;
+    
+    // read
+    m.rd[1]!1, m.addr[1]!3, m.dout[1]?buf;
+    assert(buf = expected);
+
+    // read-modify-write
+    m.rd[1]!2, m.addr[1]!3, m.dout[1]?buf;
+    assert(buf = expected);
+    expected := 17;
+    m.din[1]!expected;
+
+    // read
+    m.rd[0]!1, m.addr[0]!3, m.dout[0]?buf;
+    assert(buf = expected);
+    log("done")
+  }
+}
+
+defproc test_kram() {
+  pint W = 11;
+  std::kram<5,7,W> m;
+  int<W> buf, expected;
+
+  chp {
+    log("start");
+    // write
+    expected := 13;
+    m.rd[0]!0, m.addr[0]!3, m.din[0]!expected;
+    
+    // read
+    m.rd[1]!1, m.addr[1]!3, m.dout[1]?buf;
+    assert(buf = expected, "read");
+
+    // read-modify-write
+    m.rd[2]!2, m.addr[2]!3, m.dout[2]?buf;
+    assert(buf = expected, "read-modify-write");
+    expected := 17;
+    m.din[2]!expected;
+
+    // read
+    m.rd[4]!1, m.addr[4]!3, m.dout[4]?buf;
+    assert(buf = expected, "read2"); 
+    log("done")
+  }
+}
