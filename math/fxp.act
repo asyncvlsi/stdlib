@@ -68,7 +68,10 @@
  *          divs<A,B> (x,y) : returns "x / y" (signed)
  *        uminus<A,B> (x)   : returns "-x"
  *
- *        le<A,B>(x,y) : returns true if x <= y
+ *         le<A,B>(x,y) : returns true if x <= y
+ *         lt<A,B>(x,y) : returns true if x <  y
+ *         ge<A,B>(x,y) : returns true if x >= y
+ *         gt<A,B>(x,y) : returns true if x >  y
  *   positive<A,B>(x)  : returns true if x > 0
  *   negative<A,B>(x)  : returns true if x < 0
  *       zero<A,B>(x)  : returns true if x = 0
@@ -125,6 +128,33 @@ namespace math {
        [] y{A+B-1} = 1 & x{A+B-1} = 0 -> self := false
        [] else -> self := (x <= y)
         ]
+      }
+    }
+
+    export
+    template<pint A,B>
+    function lt(int<A+B> x, y) : bool
+    {
+      chp {
+        self := (x != y) & le<A,B>(x, y)
+      }
+    }
+
+    export
+    template<pint A,B>
+    function ge(int<A+B> x, y) : bool
+    {
+      chp {
+        self := le<A,B>(y, x)
+      }
+    }
+
+    export
+    template<pint A,B>
+    function gt(int<A+B> x, y) : bool
+    {
+      chp {
+        self := (x != y) & le<A,B>(y, x)
       }
     }
 
@@ -261,7 +291,7 @@ namespace math {
       function lt(fixpoint<A,B,ROUNDING_MODE> rhs) : bool
       {
         chp {
-          self := (x != rhs.x) & fxp::le<A,B>(x, rhs.x)
+          self := fxp::lt<A,B>(x, rhs.x)
         }
       }
       function ne(fixpoint<A,B,ROUNDING_MODE> rhs) : bool
@@ -273,13 +303,13 @@ namespace math {
       function ge(fixpoint<A,B,ROUNDING_MODE> rhs) : bool
       {
         chp {
-          self := fxp::le<A,B>(rhs.x, x)
+          self := fxp::ge<A,B>(x, rhs.x)
         }
       }
       function gt(fixpoint<A,B,ROUNDING_MODE> rhs) : bool
       {
         chp {
-          self := (x != rhs.x) & fxp::le<A,B>(rhs.x, x)
+          self := fxp::gt<A,B>(x, rhs.x)
         }
       }
 
