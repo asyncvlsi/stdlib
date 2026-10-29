@@ -252,7 +252,7 @@ export defcell XNOR2X1 (bool? A, B; bool! Y)
   }
    prs {
      A & B       => C-
-     (A | B) & C => Y-
+     C & (A | B) => Y-
    }
    sizing { C{-1}; Y{-1} }
 }
