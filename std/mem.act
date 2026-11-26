@@ -52,6 +52,121 @@ defproc ram (chan?(int<2>) rd; chan?(int<std::ceil_log2(N)>) addr;
     }
 }
 
+export template<pint N, W>
+defproc dualram (
+  chan?(int<2>) rd[2]; chan?(int<std::ceil_log2(N)>) addr[2];
+  chan?(int<W>) din[2];
+  chan!(int<W>) dout[2])
+{
+  pint bits = std::ceil_log2(N);
+  int<W> m[N], d;
+  int<bits> a;
+  int<2> b;
+  int<1> c;
+
+  chp {
+   *[ [ #rd[0] | #addr[0] -> addr[0]?a, rd[0]?b, c := 0
+     [] #rd[1] | #addr[1] -> addr[1]?a, rd[1]?b, c := 1
+      ];
+
+        // write
+      [ b=0 -> [ c = 0 -> din[0]?d
+              [] else -> din[1]?d
+               ];
+               m[a] := d
+
+        // read
+     [] b=1 -> [ c = 0 -> dout[0]!m[a]
+              [] else -> dout[1]!m[a]
+               ]
+
+        // read-modify-write
+     [] b=2 -> [ c = 0 -> dout[0]!m[a]; din[0]?m[a]
+              [] else -> dout[1]!m[a]; din[1]?m[a]
+               ]
+
+     [] else -> assert(0)
+      ]
+    ]
+  }
+}
+
+template<pint K, N, W>
+defproc leaf(
+  chan?(int<2>) rd[K]; chan?(int<std::ceil_log2(N)>) addr[K];
+  chan?(int<W>) din[K];
+  chan!(int<W>) dout[K];
+  chan!(int<2>) rd_rev; chan!(int<std::ceil_log2(N)>) addr_rev;
+  chan!(int<W>) din_rev;
+  chan?(int<W>) dout_rev)
+{
+  { K = 1 | K = 2 };
+
+  pint bits = std::ceil_log2(N);
+  int<W> d;
+  int<bits> a;
+  int<2> b;
+  int<1> c;
+
+  chp {
+   *[ [([]i:K: #rd[i] & #addr[i] -> addr[i]?a, rd[i]?b, c := i)];
+      rd_rev!b, addr_rev!a;
+
+      // write
+      [ b=0 -> [([]i:K: c = i -> din[i]?d)];
+               din_rev!d
+
+      // read
+     [] b=1 -> dout_rev?d;
+               [([]i:K: c = i -> dout[i]!d)]
+
+      // read-modify-write
+     [] b=2 -> dout_rev?d;
+               [([]i:K: c = i -> dout[i]!d; din[i]?d)];
+               din_rev!d
+
+     [] else -> assert(0)
+      ]
+    ]
+  }
+}
+
+template<pint K, N, W>
+defproc tree(
+  chan?(int<2>) rd[K]; chan?(int<std::ceil_log2(N)>) addr[K];
+  chan?(int<W>) din[K];
+  chan!(int<W>) dout[K];
+  chan!(int<2>) rd_rev; chan!(int<std::ceil_log2(N)>) addr_rev;
+  chan!(int<W>) din_rev;
+  chan?(int<W>) dout_rev)
+{
+  [ K <= 2 -> leaf<K, N, W> l(.rd=rd, .addr=addr, .din=din, .dout=dout,
+                              .rd_rev=rd_rev, .addr_rev=addr_rev, .din_rev=din_rev, .dout_rev=dout_rev);
+ [] else ->  pint K_half = K/2;
+             tree<K_half, N, W> t0(.rd=rd[0..K_half-1], .addr=addr[0..K_half-1], .din=din[0..K_half-1], .dout=dout[0..K_half-1]);
+             tree<K-K_half, N, W> t1(.rd=rd[K_half..K-1], .addr=addr[K_half..K-1], .din=din[K_half..K-1], .dout=dout[K_half..K-1]);
+             leaf<2, N, W> lt(.rd_rev=rd_rev, .addr_rev=addr_rev, .din_rev=din_rev, .dout_rev=dout_rev);
+             lt.rd[0] = t0.rd_rev;
+             lt.addr[0] = t0.addr_rev;
+             lt.din[0] = t0.din_rev;
+             lt.dout[0] = t0.dout_rev;
+             lt.rd[1] = t1.rd_rev;
+             lt.addr[1] = t1.addr_rev;
+             lt.din[1] = t1.din_rev;
+             lt.dout[1] = t1.dout_rev;
+  ];
+}
+
+export template<pint K, N, W>
+defproc kram (
+  chan?(int<2>) rd[K]; chan?(int<std::ceil_log2(N)>) addr[K];
+  chan?(int<W>) din[K];
+  chan!(int<W>) dout[K])
+{
+  ram<N, W> r;
+  tree<K, N, W> l(.rd=rd, .addr=addr, .din=din, .dout=dout,
+                  .rd_rev=r.rd, .addr_rev=r.addr, .din_rev=r.din, .dout_rev=r.dout);
+}
 
 /*-- built-in ROM (max 64 bit) --*/
 export function read_rom(int<32> idx) : int<64>;
