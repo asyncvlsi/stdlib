@@ -264,6 +264,12 @@ namespace math {
           self := (x != rhs.x) & fxp::le<A,B>(x, rhs.x)
         }
       }
+      function eq(fixpoint<A,B,ROUNDING_MODE> rhs) : bool
+      {
+        chp{
+          self:= (x = rhs.x)
+        }
+      }
       function ne(fixpoint<A,B,ROUNDING_MODE> rhs) : bool
       {
         chp {
